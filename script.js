@@ -1,3 +1,4 @@
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
@@ -18,4 +19,20 @@ function drop(ev) {
     if (dropZone !== data && !dragElements.includes(dropZone)) {
         ev.target.appendChild(draggedElement);
     }
+}
+
+function loadAllTasks() {
+    let currentTasks = [];
+    currentTasks = tasks;
+   for (let i = 0; i < currentTasks.length; i++) {
+    const task = currentTasks[i];
+    const column = task.column;
+    const title = task.title;
+    const id = task.id;
+
+    document.getElementById(column).innerHTML += `
+    <div class="drag" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
+    `
+    
+   }
 }

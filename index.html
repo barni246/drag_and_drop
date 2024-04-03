@@ -10,13 +10,20 @@
 </head>
 <body onload="loadAllTasks()">
     <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
+       <h2>Todo</h2> 
     </div>
     <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
+       <h2>Do Today</h2> 
     </div>
     <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
+       <h2>In Progress</h2> 
     </div>
     <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
+       <h2>Done</h2> 
     </div>
     
+    <div id="layOver"  class="lay-over">
+        <div class="task-pop-up"></div>
+    </div>
 </body>
 </html>

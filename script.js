@@ -22,6 +22,7 @@ function drop(ev) {
 }
 
 function loadAllTasks() {
+  document.getElementById('layOver').style.display = "none";
     let currentTasks = [];
     currentTasks = tasks;
    for (let i = 0; i < currentTasks.length; i++) {
@@ -31,8 +32,13 @@ function loadAllTasks() {
     const id = task.id;
 
     document.getElementById(column).innerHTML += `
-    <div class="drag" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
-    `
-    
+    <div class="drag" onclick="taskPopUp(${id})" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
+    ` 
    }
 }
+
+
+function taskPopUp(TaskId) {
+  document.getElementById('layOver').style.display = "block";
+}
+

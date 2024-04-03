@@ -27,6 +27,7 @@ function drop(ev) {
     if (dropZone !== data && !dragElements.includes(dropZone)) {
         ev.target.appendChild(draggedElement);
     }
+    console.log(currentTasks);
 }
 
 function loadAllTasks() {

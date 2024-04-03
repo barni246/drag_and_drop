@@ -20,7 +20,7 @@ tasks = [
         title:'task2',
         description:'text2',
         column: 'inProgress',
-        taskIndex:2,
+        taskIndex:1,
         createdAt:11
     },
     {
@@ -28,7 +28,7 @@ tasks = [
         title:'task3',
         description:'text3',
         column: 'inProgress',
-        taskIndex:3,
+        taskIndex:2,
         createdAt:11
     },
     {
@@ -36,7 +36,7 @@ tasks = [
         title:'task4',
         description:'text4',
         column: 'done',
-        taskIndex:4,
+        taskIndex:1,
         createdAt:11
     },
     ]

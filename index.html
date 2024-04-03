@@ -1,29 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drag and Drop</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-    <script src="tasks.js"></script>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Drag and Drop</title>
+   <link rel="stylesheet" href="style.css">
+   <script src="script.js"></script>
+   <script src="tasks.js"></script>
 </head>
+
 <body onload="loadAllTasks()">
-    <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
-       <h2>Todo</h2> 
-    </div>
-    <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
-       <h2>Do Today</h2> 
-    </div>
-    <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
-       <h2>In Progress</h2> 
-    </div>
-    <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)">
-       <h2>Done</h2> 
-    </div>
-    
-    <div id="layOver"  class="lay-over">
-        <div class="task-pop-up"></div>
-    </div>
+   <header>
+      <button onclick="createTask()">Create Task</button>
+   </header>
+
+   <main>
+
+      <div class="column-wrapper">
+         <h2>Todo</h2>
+         <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+
+      <div class="column-wrapper">
+         <h2>Do Today</h2>
+         <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+
+      <div class="column-wrapper">
+         <h2>In Progress</h2>
+         <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+
+      <div class="column-wrapper">
+         <h2>Done</h2>
+         <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+
+   </main>
+
+
+
+   <div id="layOver" onclick="closeTaskPopUp()" class="lay-over">
+
+      <div id="taskPopUpDialog" onclick="event.stopPropagation()" class="task-pop-up">
+
+      </div>
+   </div>
 </body>
+
 </html>

@@ -36,7 +36,7 @@ tasks = [
         title:'task4',
         description:'text4',
         column: 'done',
-        taskIndex:1,
+        taskIndex:0,
         createdAt:11
     },
     ]

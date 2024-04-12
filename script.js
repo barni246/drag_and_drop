@@ -1,3 +1,4 @@
+
 let currentTasks = [];
 
 
@@ -29,18 +30,16 @@ function drop(ev) {
     maxTaskIndex++; // Inkrementiert den höchsten taskIndex-Wert um 1, um den neuen taskIndex für den verschobenen Task zu bestimmen
     task.column = newColumn; // Aktualisiert die Spalte des verschobenen Tasks
     task.taskIndex = maxTaskIndex; // Aktualisiert den taskIndex des verschobenen Tasks
+    afterDropToBackend(ev);
     clearColumn(); // Leert alle Spalten, um die Tasks neu zu rendern
     loadAllTasks(); // Rendert alle Tasks basierend auf den aktualisierten Daten
   }
 }
 
 
-
 function loadAllTasks() {
   document.getElementById('layOver').style.display = "none";
-  currentTasks = tasks;
-
-  // Gruppiere Tasks nach Spalten
+  //currentTasks = tasks;
   const tasksByColumn = {};
   for (const task of currentTasks) {
     if (!tasksByColumn[task.column]) {
@@ -48,36 +47,31 @@ function loadAllTasks() {
     }
     tasksByColumn[task.column].push(task);
   }
+  renderTasks(tasksByColumn);
+}
 
-  // Rendere Tasks für jede Spalte
+
+function renderTasks(tasksByColumn) {
   for (const column in tasksByColumn) {
     if (tasksByColumn.hasOwnProperty(column)) {
-      // Sortiere Tasks in der aktuellen Spalte nach ihrem taskIndex
       const tasksInColumn = tasksByColumn[column].sort((a, b) => a.taskIndex - b.taskIndex);
-
-      // Setze den taskIndex des einzigen Tasks in der Spalte auf 0, wenn er alleine ist
       if (tasksInColumn.length === 1) {
         tasksInColumn[0].taskIndex = 0;
       }
-
-      // Rendere Tasks in der aktuellen Spalte
-      const columnElement = document.getElementById(column);
-      columnElement.innerHTML = ''; // Leere Spalte vor dem Rendern
+      const currentColumn = document.getElementById(column);
       for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
         const description = task.description;
         const taskIndex = task.taskIndex;
         const createdAt = task.createdAt;
-
-        columnElement.innerHTML += `
+        currentColumn.innerHTML += `
                   <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
               `;
       }
     }
   }
 }
-
 
 
 function openTaskPopUp(id, title, column, description, taskIndex, createdAt) {
@@ -112,11 +106,8 @@ function createTask() {
   `;
 }
 
-function addTask() {
-  const title = document.getElementById('title').value;
-  const description = document.getElementById('description').value;
-  const column = document.getElementById('column').value;
 
+function addTask() {
   let maxId = 0;
   let maxTaskIndex = 0;
   currentTasks.forEach(task => {
@@ -127,28 +118,37 @@ function addTask() {
       maxTaskIndex = task.taskIndex;
     }
   });
-
   const newId = maxId + 1;
   const newTaskIndex = maxTaskIndex + 1;
+  newTaskObj(newId,newTaskIndex); 
+  currentTasks.push(newTask);
+  clearColumn();
+  loadAllTasks();
+  closeTaskPopUp();
+}
 
-  const currentDate = new Date();
-  const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
-  const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
-  const creationDateTime = `${formattedDate} ${formattedTime}`;
 
-  const newTask = {
+function newTaskObj(newId,newTaskIndex) {
+const title = document.getElementById('title').value;
+const description = document.getElementById('description').value;
+const column = document.getElementById('column').value;
+  return newTask = {
     id: newId,
     title: title,
     description: description,
     column: column,
     taskIndex: newTaskIndex,
-    createdAt: creationDateTime
+    createdAt: timeAndDateFormat()
   };
+}
 
-  currentTasks.push(newTask);
-  clearColumn();
-  loadAllTasks();
-  closeTaskPopUp();
+
+function timeAndDateFormat() {
+  const currentDate = new Date();
+  const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+  const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
+  const creationDateTime = `${formattedDate} ${formattedTime}`;
+  return creationDateTime;
 }
 
 
@@ -158,4 +158,8 @@ function clearColumn() {
     document.getElementById(containerId).innerHTML = '';
   });
 }
+
+
+
+
 

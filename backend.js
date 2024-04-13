@@ -23,11 +23,11 @@ function loadAllTasksFromBackend() {
             for (const column in tasksByColumn) {
                 if (tasksByColumn.hasOwnProperty(column)) {
                     // Sortiere Tasks in der aktuellen Spalte nach ihrem taskIndex
-                    const tasksInColumn = tasksByColumn[column].sort((a, b) => a.taskIndex - b.taskIndex);
+                    const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
 
                     // Setze den taskIndex des einzigen Tasks in der Spalte auf 0, wenn er alleine ist
                     if (tasksInColumn.length === 1) {
-                        tasksInColumn[0].taskIndex = 0;
+                        tasksInColumn[0].task_index = 0;
                     }
 
                     // Rendere Tasks in der aktuellen Spalte
@@ -54,22 +54,54 @@ function loadAllTasksFromBackend() {
 }
 
 
-async function afterDropToBackend(ev) {
+// async function afterDropToBackend(ev) {
+//     const data = ev.dataTransfer.getData("text");
+//     const task = currentTasks.find(task => task.id === parseInt(data));
+//     const dropZone = ev.target.id;
+//     const newColumn = dropZone;
+//     const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
+//     let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
+//     maxTaskIndex++;
+
+//     const updateData = {
+//         id: task.id,
+//         column: newColumn,
+//         task_index: maxTaskIndex
+//     };
+
+//     console.log('JSON.stringify(updateData)', JSON.stringify(updateData));
+//     try {
+//         const response = await fetch(`http://127.0.0.1:8000/tasks/${task.id}/`, {
+//             method: 'PUT',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(updateData)
+//         }).then(function (response) {
+//             console.log('response', response);
+//             return response.text()
+//         });
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+
+
+
+
+async function afterDropToBackend(ev,newTaskIndex) {
     const data = ev.dataTransfer.getData("text");
-    const task = currentTasks.find(task => task.id === parseInt(data)); 
+    const task = currentTasks.find(task => task.id === parseInt(data));
     const dropZone = ev.target.id;
     const newColumn = dropZone;
-    const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn); 
-    let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.taskIndex));
-    maxTaskIndex++;
-   
     const updateData = {
         id: task.id,
         column: newColumn,
-        task_index: maxTaskIndex
+        task_index: newTaskIndex 
     };
 
-    console.log('JSON.stringify(updateData)',JSON.stringify(updateData));
+    console.log('JSON.stringify(updateData)', JSON.stringify(updateData));
     try {
         const response = await fetch(`http://127.0.0.1:8000/tasks/${task.id}/`, {
             method: 'PUT',
@@ -77,11 +109,15 @@ async function afterDropToBackend(ev) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(updateData)
-        }).then(function(response) {
-            console.log('response',response);
-            return response.text()});
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        console.log('Response:', response);
+        clearColumn();
+        loadAllTasks();
     } catch (error) {
-        console.error('Error barni:', error);
+        console.error('Error:', error);
     }
 }
 
@@ -132,31 +168,47 @@ async function afterDropToBackend(ev) {
 //   }
 
 
-function createTaskBackend(taskData) {
-    fetch('http://127.0.0.1:8000/tasks/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(taskData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Task created:', data);
-            // Hier können Sie weitere Aktionen ausführen, z.B. die Benutzeroberfläche aktualisieren
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Hier können Sie Fehlerbehandlung durchführen, z.B. Benachrichtigungen anzeigen
-        });
-    clearColumn();
-    loadAllTasks();
+// function createTaskBackend(taskData) {
+//     fetch('http://127.0.0.1:8000/tasks/', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(taskData)
+//     })
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             console.log('Task created:', data);
+//             // Hier können Sie weitere Aktionen ausführen, z.B. die Benutzeroberfläche aktualisieren
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             // Hier können Sie Fehlerbehandlung durchführen, z.B. Benachrichtigungen anzeigen
+//         });
+//     clearColumn();
+//     loadAllTasks();
+// }
+
+
+
+function newTaskObjForBackend(newTaskIndex) {
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const column = document.getElementById('column').value;
+    return newTask = {
+        title: title,
+        description: description,
+        column: column,
+        task_index: newTaskIndex,
+        created_by: 'barni'
+    };
 }
+
 
 //await createTaskBackend(taskDataBackend);
 

@@ -30,7 +30,8 @@ function drop(ev) {
     maxTaskIndex++; // Inkrementiert den höchsten taskIndex-Wert um 1, um den neuen taskIndex für den verschobenen Task zu bestimmen
     task.column = newColumn; // Aktualisiert die Spalte des verschobenen Tasks
     task.taskIndex = maxTaskIndex; // Aktualisiert den taskIndex des verschobenen Tasks
-    afterDropToBackend(ev);
+    const newTaskIndex = maxTaskIndex; // Neue Task-Index berechnen
+    afterDropToBackend(ev,newTaskIndex); //
     clearColumn(); // Leert alle Spalten, um die Tasks neu zu rendern
     loadAllTasks(); // Rendert alle Tasks basierend auf den aktualisierten Daten
   }
@@ -46,6 +47,7 @@ function loadAllTasks() {
       tasksByColumn[task.column] = [];
     }
     tasksByColumn[task.column].push(task);
+    
   }
   renderTasks(tasksByColumn);
 }
@@ -107,25 +109,86 @@ function createTask() {
 }
 
 
-function addTask() {
-  let maxId = 0;
+// function addTask() {
+//   let maxId = 0;
+//   let maxTaskIndex = 0;
+//   currentTasks.forEach(task => {
+//     if (task.id > maxId) {
+//       maxId = task.id;
+//     }
+//     if (task.column === column && task.taskIndex > maxTaskIndex) {
+//       maxTaskIndex = task.taskIndex;
+//     }
+//   });
+  
+//   const newTaskIndex = maxTaskIndex + 1;
+//   let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex);
+//   createTaskBackend(newTaskObjToBackend);
+  
+//   //const newId = maxId + 1;
+//   const newId = newIdFromBackend();
+//   let newTaskObjToFrontend = newTaskObj(newId,newTaskIndex); 
+//    currentTasks.push(newTaskObjToFrontend);
+  
+//   clearColumn();
+//   loadAllTasks();
+//   closeTaskPopUp();
+//   console.log('currentTasks: ', currentTasks)
+// }
+
+
+
+
+async function addTask() {
   let maxTaskIndex = 0;
   currentTasks.forEach(task => {
-    if (task.id > maxId) {
-      maxId = task.id;
-    }
-    if (task.column === column && task.taskIndex > maxTaskIndex) {
-      maxTaskIndex = task.taskIndex;
+    if (task.column === column && task.task_index > maxTaskIndex) {
+      maxTaskIndex = task.task_index;
     }
   });
-  const newId = maxId + 1;
+
   const newTaskIndex = maxTaskIndex + 1;
-  newTaskObj(newId,newTaskIndex); 
-  currentTasks.push(newTask);
+  let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex);
+  
+  // Task im Backend erstellen und ID abrufen
+  const newId = await createTaskBackendAndGetId(newTaskObjToBackend);
+  
+  // Neuen Task mit der erhaltenen ID im Frontend erstellen
+  let newTaskObjToFrontend = newTaskObj(newId, newTaskIndex);
+  currentTasks.push(newTaskObjToFrontend);
+  
   clearColumn();
   loadAllTasks();
   closeTaskPopUp();
+  console.log('currentTasks: ', currentTasks)
 }
+
+async function createTaskBackendAndGetId(taskData) {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/tasks/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(taskData)
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create task in backend');
+    }
+    const responseData = await response.json();
+    return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
+  } catch (error) {
+    console.error('Error creating task in backend:', error);
+    // Fehlerbehandlung hier einfügen, falls das Erstellen des Tasks im Backend fehlschlägt
+    return null;
+  }
+}
+
+
+
+
+
+
 
 
 function newTaskObj(newId,newTaskIndex) {
@@ -137,7 +200,7 @@ const column = document.getElementById('column').value;
     title: title,
     description: description,
     column: column,
-    taskIndex: newTaskIndex,
+    task_index: newTaskIndex,
     createdAt: timeAndDateFormat()
   };
 }

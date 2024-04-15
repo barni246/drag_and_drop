@@ -13,41 +13,44 @@ function drag(ev) {
 }
 
 
-function drop(ev) {
-  ev.preventDefault();
-  const data = ev.dataTransfer.getData("text"); // ID des verschobenen Tasks
-  const dropZone = ev.target.id; // ID der Spalte, in die der Task verschoben wird
-  const dragElements = Array.from(document.querySelectorAll('.drag')).map(element => element.id); // Array mit den IDs aller Tasks
-  const taskId = data; // Speichert die ID des verschobenen Tasks in der Variable taskId
-  const indexOfCurrentTask = currentTasks.findIndex(task => task.id === parseInt(taskId)); // Findet den Index des verschobenen Tasks in der aktuellen Taskliste
 
-  // Überprüft, ob der Task nicht auf sich selbst gezogen wurde und die Ziel-Spalte keine anderen Tasks enthält
+function drop(ev) {
+  
+  ev.preventDefault();
+  const data = ev.dataTransfer.getData("text");
+  const dropZone = ev.target.id;
+  const dragElements = Array.from(document.querySelectorAll('.drag')).map(element => element.id);
+  const taskId = data;
+  const indexOfCurrentTask = currentTasks.findIndex(task => task.id === parseInt(taskId));
   if (dropZone !== data && !dragElements.includes(dropZone)) {
-    const task = currentTasks[indexOfCurrentTask]; // Der verschobene Task
-    const newColumn = dropZone; // Die Spalte, in die der Task verschoben wird
-    const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn); // Alle Tasks in der Ziel-Spalte
-    let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.taskIndex)); // Findet den höchsten taskIndex-Wert in der Ziel-Spalte
-    maxTaskIndex++; // Inkrementiert den höchsten taskIndex-Wert um 1, um den neuen taskIndex für den verschobenen Task zu bestimmen
-    task.column = newColumn; // Aktualisiert die Spalte des verschobenen Tasks
-    task.taskIndex = maxTaskIndex; // Aktualisiert den taskIndex des verschobenen Tasks
-    const newTaskIndex = maxTaskIndex; // Neue Task-Index berechnen
-    afterDropToBackend(ev,newTaskIndex); //
-    clearColumn(); // Leert alle Spalten, um die Tasks neu zu rendern
-    loadAllTasks(); // Rendert alle Tasks basierend auf den aktualisierten Daten
+    const task = currentTasks[indexOfCurrentTask];
+    const newColumn = dropZone;
+    task.column = newColumn;
+    const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
+    if (tasksInSameColumn.length === 0) {
+      task.task_index = 1;
+      afterDropToBackend(ev, task.task_index);
+    } else {
+      let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
+      task.task_index = maxTaskIndex + 1;
+      afterDropToBackend(ev, task.task_index);
+    }
+    clearColumn();
+    loadAllTasks();
   }
 }
 
 
+
 function loadAllTasks() {
   document.getElementById('layOver').style.display = "none";
-  //currentTasks = tasks;
   const tasksByColumn = {};
   for (const task of currentTasks) {
     if (!tasksByColumn[task.column]) {
       tasksByColumn[task.column] = [];
     }
     tasksByColumn[task.column].push(task);
-    
+
   }
   renderTasks(tasksByColumn);
 }
@@ -56,17 +59,14 @@ function loadAllTasks() {
 function renderTasks(tasksByColumn) {
   for (const column in tasksByColumn) {
     if (tasksByColumn.hasOwnProperty(column)) {
-      const tasksInColumn = tasksByColumn[column].sort((a, b) => a.taskIndex - b.taskIndex);
-      if (tasksInColumn.length === 1) {
-        tasksInColumn[0].taskIndex = 0;
-      }
+      const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
       const currentColumn = document.getElementById(column);
       for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
         const description = task.description;
-        const taskIndex = task.taskIndex;
-        const createdAt = task.createdAt;
+        const taskIndex = task.task_index;
+        const createdAt = task.created_at;
         currentColumn.innerHTML += `
                   <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
               `;
@@ -80,6 +80,7 @@ function openTaskPopUp(id, title, column, description, taskIndex, createdAt) {
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
   <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
+  <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
   <div>ID: ${id}</div>
   <div>Title: ${title}</div>
   <div>Column: ${column}</div>
@@ -95,113 +96,102 @@ function closeTaskPopUp() {
 }
 
 
-function createTask() {
+function deleteTaskFrontend(id) {
+  const index = currentTasks.findIndex(task => task.id === id);
+  if (index !== -1) {
+    currentTasks.splice(index, 1);
+    deleteTaskBackend(id);
+    clearColumn();
+    loadAllTasks();
+    closeTaskPopUp();
+  }
+}
+
+
+// async function deleteTaskBackend(id) {
+//   try {
+//       const response = await fetch(`http://127.0.0.1:8000/tasks/${id}/`, {
+//           method: 'DELETE',
+//           headers: {
+//               'Content-Type': 'application/json'
+//           }
+//       });
+//       if (!response.ok) {
+//           throw new Error('Failed to delete task from backend.');
+//       }
+//       console.log('Task deleted successfully.');
+//   } catch (error) {
+//       console.error('Error deleting task from backend:', error.message);
+//   }
+// }
+
+
+async function deleteTaskBackend(id) {
+  try {
+      const csrftoken = getCSRFToken(); // CSRF-Token aus dem Local Storage abrufen
+
+      const response = await fetch(`http://127.0.0.1:8000/tasks/detail/${id}/`, {
+          method: 'DELETE',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken // CSRF-Token zum Header hinzufügen
+          }
+      });
+      if (!response.ok) {
+          throw new Error('Failed to delete task from backend.');
+      }
+      console.log('Task deleted successfully.');
+  } catch (error) {
+      console.error('Error deleting task from backend:', error.message);
+  }
+}
+
+
+
+function createTask(column) {
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
       <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
-      <form onsubmit="event.preventDefault(); addTask()">
+      <form onsubmit="event.preventDefault(); addTask('${column}')">
           <input placeholder="Title..." name="title" id="title" type="text" required>
           <input placeholder="Description..." name="description" id="description" type="text" required>
-          <input placeholder="Column..." name="column" id="column" type="text" required>
           <button type="submit">Create Task</button>
       </form>
   `;
 }
 
 
-// function addTask() {
-//   let maxId = 0;
-//   let maxTaskIndex = 0;
-//   currentTasks.forEach(task => {
-//     if (task.id > maxId) {
-//       maxId = task.id;
-//     }
-//     if (task.column === column && task.taskIndex > maxTaskIndex) {
-//       maxTaskIndex = task.taskIndex;
-//     }
-//   });
-  
-//   const newTaskIndex = maxTaskIndex + 1;
-//   let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex);
-//   createTaskBackend(newTaskObjToBackend);
-  
-//   //const newId = maxId + 1;
-//   const newId = newIdFromBackend();
-//   let newTaskObjToFrontend = newTaskObj(newId,newTaskIndex); 
-//    currentTasks.push(newTaskObjToFrontend);
-  
-//   clearColumn();
-//   loadAllTasks();
-//   closeTaskPopUp();
-//   console.log('currentTasks: ', currentTasks)
-// }
-
-
-
-
-async function addTask() {
-  let maxTaskIndex = 0;
-  currentTasks.forEach(task => {
-    if (task.column === column && task.task_index > maxTaskIndex) {
-      maxTaskIndex = task.task_index;
+async function addTask(column) {
+  let maxTaskIndex = currentTasks.reduce((maxIndex, task) => {
+    if (task.column === column && task.task_index > maxIndex) {
+      return task.task_index;
+    } else {
+      return maxIndex;
     }
-  });
+  }, 0);
 
   const newTaskIndex = maxTaskIndex + 1;
-  let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex);
-  
-  // Task im Backend erstellen und ID abrufen
+  let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex, column);
   const newId = await createTaskBackendAndGetId(newTaskObjToBackend);
-  
-  // Neuen Task mit der erhaltenen ID im Frontend erstellen
-  let newTaskObjToFrontend = newTaskObj(newId, newTaskIndex);
+  let newTaskObjToFrontend = newTaskObj(newId, newTaskIndex, column);
   currentTasks.push(newTaskObjToFrontend);
-  
   clearColumn();
   loadAllTasks();
   closeTaskPopUp();
-  console.log('currentTasks: ', currentTasks)
-}
-
-async function createTaskBackendAndGetId(taskData) {
-  try {
-    const response = await fetch('http://127.0.0.1:8000/tasks/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(taskData)
-    });
-    if (!response.ok) {
-      throw new Error('Failed to create task in backend');
-    }
-    const responseData = await response.json();
-    return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
-  } catch (error) {
-    console.error('Error creating task in backend:', error);
-    // Fehlerbehandlung hier einfügen, falls das Erstellen des Tasks im Backend fehlschlägt
-    return null;
-  }
+  console.log('currentTasks addTask: ', currentTasks);
 }
 
 
-
-
-
-
-
-
-function newTaskObj(newId,newTaskIndex) {
-const title = document.getElementById('title').value;
-const description = document.getElementById('description').value;
-const column = document.getElementById('column').value;
+function newTaskObj(newId, newTaskIndex, column) {
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
   return newTask = {
     id: newId,
     title: title,
     description: description,
     column: column,
     task_index: newTaskIndex,
-    createdAt: timeAndDateFormat()
+    created_at: timeAndDateFormat()
   };
 }
 

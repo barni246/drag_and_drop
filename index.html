@@ -9,32 +9,36 @@
    <script src="script.js"></script>
    <script src="tasks.js"></script>
    <script src="backend.js"></script>
+   <script src="login.js"></script>
 </head>
 
 <body onload="loadAllTasksFromBackend()">
 
-   <header>
-      <button onclick="createTask()">Create Task</button>
-   </header>
+   <header></header>
 
    <main>
 
       <div class="column-wrapper">
+         <button onclick="createTask('todo')">New Task</button>
          <h2>Todo</h2>
          <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
+     
 
       <div class="column-wrapper">
+         <button onclick="createTask('doToday')">New Task</button>
          <h2>Do Today</h2>
          <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
+         <button onclick="createTask('inProgress')">New Task</button>
          <h2>In Progress</h2>
          <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
+         <button onclick="createTask('done')">New Task</button>
          <h2>Done</h2>
          <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>

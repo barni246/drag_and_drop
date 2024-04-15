@@ -1,5 +1,36 @@
+// function loadAllTasksFromBackend() {
+//     document.getElementById('layOver').style.display = "none";
+//     fetch('http://127.0.0.1:8000/tasks/')
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             currentTasks = data;
+//             const tasksByColumn = {};
+//             for (const task of currentTasks) {
+//                 if (!tasksByColumn[task.column]) {
+//                     tasksByColumn[task.column] = [];
+//                 }
+//                 tasksByColumn[task.column].push(task);
+//             }
+//             for (const column in tasksByColumn) {
+//                 if (tasksByColumn.hasOwnProperty(column)) {
+//                     const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
+//                     renderTasksFromBackend(tasksInColumn,column);     
+//                 }
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//         });
+// }
+
 function loadAllTasksFromBackend() {
     document.getElementById('layOver').style.display = "none";
+
     fetch('http://127.0.0.1:8000/tasks/')
         .then(response => {
             if (!response.ok) {
@@ -9,8 +40,6 @@ function loadAllTasksFromBackend() {
         })
         .then(data => {
             currentTasks = data;
-            console.log('data', data)
-            // Gruppiere Tasks nach Spalten
             const tasksByColumn = {};
             for (const task of currentTasks) {
                 if (!tasksByColumn[task.column]) {
@@ -18,79 +47,39 @@ function loadAllTasksFromBackend() {
                 }
                 tasksByColumn[task.column].push(task);
             }
-
-            // Rendere Tasks für jede Spalte
             for (const column in tasksByColumn) {
                 if (tasksByColumn.hasOwnProperty(column)) {
-                    // Sortiere Tasks in der aktuellen Spalte nach ihrem taskIndex
                     const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
-
-                    // Setze den taskIndex des einzigen Tasks in der Spalte auf 0, wenn er alleine ist
-                    if (tasksInColumn.length === 1) {
-                        tasksInColumn[0].task_index = 0;
-                    }
-
-                    // Rendere Tasks in der aktuellen Spalte
-                    const columnElement = document.getElementById(column);
-                    columnElement.innerHTML = ''; // Leere Spalte vor dem Rendern
-                    for (const task of tasksInColumn) {
-                        const title = task.title;
-                        const id = task.id;
-                        const description = task.description;
-                        const taskIndex = task.task_index;
-                        const createdAt = task.created_at; // Anpassen Sie den Schlüssel entsprechend Ihrer Datenbank
-
-                        columnElement.innerHTML += `
-                <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
-              `;
-                    }
+                    renderTasksFromBackend(tasksInColumn, column);     
                 }
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            // Fehlerbehandlung hier einfügen, z.B. eine Fehlermeldung anzeigen
         });
 }
 
 
-// async function afterDropToBackend(ev) {
-//     const data = ev.dataTransfer.getData("text");
-//     const task = currentTasks.find(task => task.id === parseInt(data));
-//     const dropZone = ev.target.id;
-//     const newColumn = dropZone;
-//     const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
-//     let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
-//     maxTaskIndex++;
 
-//     const updateData = {
-//         id: task.id,
-//         column: newColumn,
-//         task_index: maxTaskIndex
-//     };
+function renderTasksFromBackend(tasksInColumn,column) {
+    const columnElement = document.getElementById(column);
+    columnElement.innerHTML = '';
+    for (const task of tasksInColumn) {
+        const title = task.title;
+        const id = task.id;
+        const description = task.description;
+        const taskIndex = task.task_index;
+        const createdAt = task.created_at;
 
-//     console.log('JSON.stringify(updateData)', JSON.stringify(updateData));
-//     try {
-//         const response = await fetch(`http://127.0.0.1:8000/tasks/${task.id}/`, {
-//             method: 'PUT',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(updateData)
-//         }).then(function (response) {
-//             console.log('response', response);
-//             return response.text()
-//         });
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
+        columnElement.innerHTML += `
+<div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
+`;
+    }
+}
 
 
 
-
-
-async function afterDropToBackend(ev,newTaskIndex) {
+async function afterDropToBackend(ev, newTaskIndex) {
     const data = ev.dataTransfer.getData("text");
     const task = currentTasks.find(task => task.id === parseInt(data));
     const dropZone = ev.target.id;
@@ -98,15 +87,17 @@ async function afterDropToBackend(ev,newTaskIndex) {
     const updateData = {
         id: task.id,
         column: newColumn,
-        task_index: newTaskIndex 
+        task_index: newTaskIndex
     };
-
+    console.log('newTaskIndex after drop', newTaskIndex)
     console.log('JSON.stringify(updateData)', JSON.stringify(updateData));
     try {
-        const response = await fetch(`http://127.0.0.1:8000/tasks/${task.id}/`, {
+        const csrftoken = getCSRFToken(); // Hole das CSRF-Token aus dem Local Storage
+        const response = await fetch(`http://127.0.0.1:8000/tasks/drop/${task.id}/`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken // Füge das CSRF-Token zum Header hinzu
             },
             body: JSON.stringify(updateData)
         });
@@ -114,8 +105,6 @@ async function afterDropToBackend(ev,newTaskIndex) {
             throw new Error('Network response was not ok');
         }
         console.log('Response:', response);
-        clearColumn();
-        loadAllTasks();
     } catch (error) {
         console.error('Error:', error);
     }
@@ -123,99 +112,64 @@ async function afterDropToBackend(ev,newTaskIndex) {
 
 
 
-//   async function drop(ev) {
-//     ev.preventDefault();
-//     const data = ev.dataTransfer.getData("text"); // ID des verschobenen Tasks
-//     const dropZone = ev.target.id; // ID der Spalte, in die der Task verschoben wird
 
-//     // Überprüft, ob der Task nicht auf sich selbst gezogen wurde
-//     if (dropZone !== data) {
-//       const task = currentTasks.find(task => task.id === parseInt(data)); // Der verschobene Task
-//       const newColumn = dropZone; // Die Spalte, in die der Task verschoben wird
-//       const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn); // Alle Tasks in der Ziel-Spalte
-//       let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index)); // Findet den höchsten taskIndex-Wert in der Ziel-Spalte
-//       maxTaskIndex++; // Inkrementiert den höchsten taskIndex-Wert um 1, um den neuen taskIndex für den verschobenen Task zu bestimmen
 
-//       // Daten für die Aktualisierung des Tasks
-//       const updateData = {
-//         id: task.id,
-//         column: newColumn,
-//         task_index: maxTaskIndex
-//       };
-//       task.column = newColumn;
-//       task.taskIndex = maxTaskIndex;
-//       try {
-//         // AJAX-Anfrage zum Backend, um den Task zu aktualisieren
-//         const response = await fetch(`http://127.0.0.1:8000/tasks/${task.id}/`, {
-//           method: 'PUT',
-//           headers: {
-//             'Content-Type': 'application/json'
-//           },
-//           body: JSON.stringify(updateData)
+// async function createTaskBackendAndGetId(taskData) {
+//     try {
+//         const response = await fetch('http://127.0.0.1:8000/tasks/', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(taskData)
 //         });
-//         // if (!response.ok) {
-//         //   throw new Error('Network response was not ok');
-//         // }
-
-//         // Aktualisierung erfolgreich, Tasks neu rendern
-//         clearColumn();
-//         loadAllTasksFrontend();
-//       } catch (error) {
-//         console.error('Error:', error);
-//         // Fehlerbehandlung hier einfügen, z.B. eine Fehlermeldung anzeigen
-//       }
+//         if (!response.ok) {
+//             throw new Error('Failed to create task in backend');
+//         }
+//         const responseData = await response.json();
+//         return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
+//     } catch (error) {
+//         console.error('Error creating task in backend:', error);
+//         return null;
 //     }
-//   }
-
-
-// function createTaskBackend(taskData) {
-//     fetch('http://127.0.0.1:8000/tasks/', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(taskData)
-//     })
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error('Network response was not ok');
-//             }
-//             return response.json();
-//         })
-//         .then(data => {
-//             console.log('Task created:', data);
-//             // Hier können Sie weitere Aktionen ausführen, z.B. die Benutzeroberfläche aktualisieren
-//         })
-//         .catch(error => {
-//             console.error('Error:', error);
-//             // Hier können Sie Fehlerbehandlung durchführen, z.B. Benachrichtigungen anzeigen
-//         });
-//     clearColumn();
-//     loadAllTasks();
 // }
 
 
+async function createTaskBackendAndGetId(taskData) {
+    try {
+        const csrftoken = getCSRFToken(); // CSRF-Token aus dem Local Storage abrufen
 
-function newTaskObjForBackend(newTaskIndex) {
+        const response = await fetch('http://127.0.0.1:8000/tasks/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken // CSRF-Token zum Header hinzufügen
+            },
+            body: JSON.stringify(taskData)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to create task in backend');
+        }
+        const responseData = await response.json();
+        return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
+    } catch (error) {
+        console.error('Error creating task in backend:', error);
+        return null;
+    }
+}
+
+
+
+function newTaskObjForBackend(newTaskIndex, column) {
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
-    const column = document.getElementById('column').value;
+    // const column = document.getElementById('column').value;
     return newTask = {
         title: title,
         description: description,
         column: column,
         task_index: newTaskIndex,
-        created_by: 'barni'
+        created_by: 'barni' // hier kommt eingelogte Person
     };
 }
 
-
-//await createTaskBackend(taskDataBackend);
-
-// const taskDataBackend = {
-//   title: title,
-//   description: description,
-//   column: column,
-//   task_index: newTaskIndex,
-//   created_by: 'barni'
-// };

@@ -1,24 +1,24 @@
 
 
-function absenden() {
-   
-        const username = "barni";
-        const password = "12345";
-        const csrftoken = getCSRFToken();
-    
-        fetch('http://127.0.0.1:8000/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken // Senden des CSRF-Tokens als Header
-            },
-            body: JSON.stringify({ username, password })
-        })
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const csrftoken = getCSRFToken();
+
+    fetch('http://127.0.0.1:8000/login/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ username, password })
+    })
         .then(response => response.json())
         .then(data => {
             if (data.token) {
                 localStorage.setItem('token', data.token);
-                console.log('Hallo');
+                localStorage.setItem('username', username);
+                window.location.href = 'board.html';
             } else {
                 console.error('Login failed');
             }
@@ -26,10 +26,10 @@ function absenden() {
         .catch(error => {
             console.error('Error:', error);
         });
-    }
-    
-    // csrftoken =  '1e6d680b7593d3f748133b04182f336ee54cd803';
-    // localStorage.setItem('token', csrftoken);
+}
+
+// csrftoken =  '1e6d680b7593d3f748133b04182f336ee54cd803';
+// localStorage.setItem('token', csrftoken);
 
 
 
@@ -43,7 +43,6 @@ function getCSRFToken() {
     }
     return null;
 }
-
 
 
 // csak ha kell a kesöbbiekben
@@ -61,12 +60,12 @@ function fetchTasks() {
             'Authorization': `Bearer ${token}` // Verwenden Sie das Token im Authorization-Header
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        // Verarbeiten Sie die Antwort vom Server
-        console.log('Tasks:', data);
-    })
-    .catch(error => {
-        console.error('Error fetching tasks:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            // Verarbeiten Sie die Antwort vom Server
+            console.log('Tasks:', data);
+        })
+        .catch(error => {
+            console.error('Error fetching tasks:', error);
+        });
 }

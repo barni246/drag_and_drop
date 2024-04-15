@@ -9,7 +9,6 @@ function allowDrop(ev) {
 
 function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
-  //console.log('dragging elemennt id:', ev.target.id)
 }
 
 
@@ -26,6 +25,7 @@ function drop(ev) {
     const task = currentTasks[indexOfCurrentTask];
     const newColumn = dropZone;
     task.column = newColumn;
+   
     const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
     if (tasksInSameColumn.length === 0) {
       task.task_index = 1;
@@ -108,44 +108,23 @@ function deleteTaskFrontend(id) {
 }
 
 
-// async function deleteTaskBackend(id) {
-//   try {
-//       const response = await fetch(`http://127.0.0.1:8000/tasks/${id}/`, {
-//           method: 'DELETE',
-//           headers: {
-//               'Content-Type': 'application/json'
-//           }
-//       });
-//       if (!response.ok) {
-//           throw new Error('Failed to delete task from backend.');
-//       }
-//       console.log('Task deleted successfully.');
-//   } catch (error) {
-//       console.error('Error deleting task from backend:', error.message);
-//   }
-// }
-
 
 async function deleteTaskBackend(id) {
   try {
-      const csrftoken = getCSRFToken(); // CSRF-Token aus dem Local Storage abrufen
-
+      const csrftoken = getCSRFToken(); 
       const response = await fetch(`http://127.0.0.1:8000/tasks/detail/${id}/`, {
           method: 'DELETE',
           headers: {
               'Content-Type': 'application/json',
-              'X-CSRFToken': csrftoken // CSRF-Token zum Header hinzufügen
-          }
-      });
+              'X-CSRFToken': csrftoken  }});
       if (!response.ok) {
           throw new Error('Failed to delete task from backend.');
-      }
+         }
       console.log('Task deleted successfully.');
   } catch (error) {
       console.error('Error deleting task from backend:', error.message);
   }
 }
-
 
 
 function createTask(column) {
@@ -169,7 +148,6 @@ async function addTask(column) {
       return maxIndex;
     }
   }, 0);
-
   const newTaskIndex = maxTaskIndex + 1;
   let newTaskObjToBackend = newTaskObjForBackend(newTaskIndex, column);
   const newId = await createTaskBackendAndGetId(newTaskObjToBackend);

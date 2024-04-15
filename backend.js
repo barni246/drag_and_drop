@@ -1,32 +1,3 @@
-// function loadAllTasksFromBackend() {
-//     document.getElementById('layOver').style.display = "none";
-//     fetch('http://127.0.0.1:8000/tasks/')
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error('Network response was not ok');
-//             }
-//             return response.json();
-//         })
-//         .then(data => {
-//             currentTasks = data;
-//             const tasksByColumn = {};
-//             for (const task of currentTasks) {
-//                 if (!tasksByColumn[task.column]) {
-//                     tasksByColumn[task.column] = [];
-//                 }
-//                 tasksByColumn[task.column].push(task);
-//             }
-//             for (const column in tasksByColumn) {
-//                 if (tasksByColumn.hasOwnProperty(column)) {
-//                     const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
-//                     renderTasksFromBackend(tasksInColumn,column);     
-//                 }
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error:', error);
-//         });
-// }
 
 function loadAllTasksFromBackend() {
     document.getElementById('layOver').style.display = "none";
@@ -111,33 +82,30 @@ async function afterDropToBackend(ev, newTaskIndex) {
 }
 
 
-
-
-
-// async function createTaskBackendAndGetId(taskData) {
-//     try {
-//         const response = await fetch('http://127.0.0.1:8000/tasks/', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(taskData)
-//         });
-//         if (!response.ok) {
-//             throw new Error('Failed to create task in backend');
-//         }
-//         const responseData = await response.json();
-//         return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
-//     } catch (error) {
-//         console.error('Error creating task in backend:', error);
-//         return null;
-//     }
-// }
+async function getUserIdByUsername(username) {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/user_id_by_username/${username}/`);
+        if (!response.ok) {
+            throw new Error('Failed to get user ID by username');
+        }
+        const responseData = await response.json();
+        return responseData.user_id;
+    } catch (error) {
+        console.error('Error getting user ID by username:', error);
+        return null;
+    }
+}
 
 
 async function createTaskBackendAndGetId(taskData) {
     try {
+        const username = taskData.created_by;
+        const userId = await getUserIdByUsername(username); // Benutzerprimärschlüssel abrufen
+
         const csrftoken = getCSRFToken(); // CSRF-Token aus dem Local Storage abrufen
+
+        // Ersetzen Sie den Benutzernamen durch den Benutzerprimärschlüssel
+        taskData.created_by = userId;
 
         const response = await fetch('http://127.0.0.1:8000/tasks/', {
             method: 'POST',
@@ -147,9 +115,11 @@ async function createTaskBackendAndGetId(taskData) {
             },
             body: JSON.stringify(taskData)
         });
+
         if (!response.ok) {
             throw new Error('Failed to create task in backend');
         }
+
         const responseData = await response.json();
         return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
     } catch (error) {
@@ -159,17 +129,19 @@ async function createTaskBackendAndGetId(taskData) {
 }
 
 
-
 function newTaskObjForBackend(newTaskIndex, column) {
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
-    // const column = document.getElementById('column').value;
     return newTask = {
         title: title,
         description: description,
         column: column,
         task_index: newTaskIndex,
-        created_by: 'barni' // hier kommt eingelogte Person
+        created_by: getUserName()
     };
 }
 
+
+function getUserName() {
+ return localStorage.getItem('username');
+}

@@ -1,7 +1,6 @@
 
 function loadAllTasksFromBackend() {
     document.getElementById('layOver').style.display = "none";
-
     fetch('http://127.0.0.1:8000/tasks/')
         .then(response => {
             if (!response.ok) {
@@ -21,7 +20,7 @@ function loadAllTasksFromBackend() {
             for (const column in tasksByColumn) {
                 if (tasksByColumn.hasOwnProperty(column)) {
                     const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
-                    renderTasksFromBackend(tasksInColumn, column);     
+                    renderTasksFromBackend(tasksInColumn, column);
                 }
             }
         })
@@ -32,28 +31,35 @@ function loadAllTasksFromBackend() {
 
 
 
-function renderTasksFromBackend(tasksInColumn,column) {
+function renderTasksFromBackend(tasksInColumn, column) {
     const columnElement = document.getElementById(column);
     columnElement.innerHTML = '';
     for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
         const description = task.description;
+        const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
         const taskIndex = task.task_index;
-        const createdAt = task.created_at;
+        const createdAt = formatCreatedAt(task.created_at); // Formatieren Sie das erstellte Datum
 
         columnElement.innerHTML += `
-<div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
-`;
+            <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
+                <div class="task-container">
+                    <span class="title-text">${title}</span>
+                    <span class="description-text">${shortDescription}</span>
+                    <span class="created-time">${createdAt}</span>
+                </div>
+            </div>
+        `;
     }
 }
-
 
 
 async function afterDropToBackend(ev, newTaskIndex) {
     const data = ev.dataTransfer.getData("text");
     const task = currentTasks.find(task => task.id === parseInt(data));
     const dropZone = ev.target.id;
+    console.log('dropZone',dropZone);
     const newColumn = dropZone;
     const updateData = {
         id: task.id,
@@ -63,12 +69,12 @@ async function afterDropToBackend(ev, newTaskIndex) {
     console.log('newTaskIndex after drop', newTaskIndex)
     console.log('JSON.stringify(updateData)', JSON.stringify(updateData));
     try {
-        const csrftoken = getCSRFToken(); // Hole das CSRF-Token aus dem Local Storage
+        const csrftoken = getCSRFToken();
         const response = await fetch(`http://127.0.0.1:8000/tasks/drop/${task.id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken // Füge das CSRF-Token zum Header hinzu
+                'X-CSRFToken': csrftoken
             },
             body: JSON.stringify(updateData)
         });
@@ -100,18 +106,15 @@ async function getUserIdByUsername(username) {
 async function createTaskBackendAndGetId(taskData) {
     try {
         const username = taskData.created_by;
-        const userId = await getUserIdByUsername(username); // Benutzerprimärschlüssel abrufen
-
-        const csrftoken = getCSRFToken(); // CSRF-Token aus dem Local Storage abrufen
-
-        // Ersetzen Sie den Benutzernamen durch den Benutzerprimärschlüssel
+        const userId = await getUserIdByUsername(username);
+        const csrftoken = getCSRFToken();
         taskData.created_by = userId;
 
         const response = await fetch('http://127.0.0.1:8000/tasks/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken // CSRF-Token zum Header hinzufügen
+                'X-CSRFToken': csrftoken
             },
             body: JSON.stringify(taskData)
         });
@@ -119,9 +122,8 @@ async function createTaskBackendAndGetId(taskData) {
         if (!response.ok) {
             throw new Error('Failed to create task in backend');
         }
-
         const responseData = await response.json();
-        return responseData.id; // ID des neu erstellten Tasks aus der Backend-Antwort abrufen
+        return responseData.id;
     } catch (error) {
         console.error('Error creating task in backend:', error);
         return null;
@@ -143,5 +145,25 @@ function newTaskObjForBackend(newTaskIndex, column) {
 
 
 function getUserName() {
- return localStorage.getItem('username');
+    return localStorage.getItem('username');
+}
+
+
+async function deleteTaskBackend(id) {
+    try {
+        const csrftoken = getCSRFToken();
+        const response = await fetch(`http://127.0.0.1:8000/tasks/detail/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete task from backend.');
+        }
+        console.log('Task deleted successfully.');
+    } catch (error) {
+        console.error('Error deleting task from backend:', error.message);
+    }
 }

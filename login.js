@@ -1,40 +1,41 @@
 
-
 async function login() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const csrftoken = getCSRFToken();
-    console.log('csrftoken',csrftoken);
-  await fetch('http://127.0.0.1:8000/login/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-           
-        },
-        body: JSON.stringify({ username, password })
-    })
-        .then(response => {
-            console.log('Response vom Server:', response);
-           return response.json();
-        })
-        .then(data => {
+
+    try {
+        const response = await fetch('http://127.0.0.1:8000/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
             if (data.token) {
-                console.log('data vom Server:', data);
+                console.log('Login successful');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', username);
                 window.location.href = 'board.html';
             } else {
                 console.error('Login failed');
+                document.getElementById('error-message-login').innerText = 'Login failed'; // Fehlermeldung anzeigen
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        } else {
+            console.error('Login failed');
+            document.getElementById('error-message-login').innerText = 'Login failed'; // Fehlermeldung anzeigen
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('error-message-login').innerText = 'Error: ' + error.message; // Fehlermeldung anzeigen
+    }
 }
 
-// token =  '1e6d680b7593d3f748133b04182f336ee54cd803';
-// 'X-CSRFToken': 'Rsu3x0TNUQN6Ky2YV9ZPl1IaofcVaX0h'
+
 
  function getCSRFToken() {
    const cookies = document.cookie.split(';');
@@ -45,6 +46,11 @@ async function login() {
         }
     }
     return null;
+}
+
+
+function toRegister() {
+    window.location.href = 'register.html';
 }
 
 

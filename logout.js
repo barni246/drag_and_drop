@@ -1,37 +1,31 @@
 async function logout() {
-    const token = localStorage.getItem('token'); // Token aus dem Local Storage abrufen
+    const token = localStorage.getItem('token'); 
     if (!token) {
         console.error('No token found. User is not logged in.');
         return;
     }
 
     try {
-        // CSRF-Token aus dem Cookie extrahieren
         const csrftoken = getCSRFTokenFromCookie();
 
-        // HTTP-Anfrage an den Server senden, um den Logout-Prozess auszulösen
         const response = await fetch('http://127.0.0.1:8000/logout/', {
             method: 'POST',
             headers: {
-                'Authorization': `Token ${token}`, // Token im Header senden
-                'X-CSRFToken': csrftoken // CSRF-Token im Header senden
+                'Authorization': `Token ${token}`, 
+                'X-CSRFToken': csrftoken 
             }
         });
-console.log('response', response);
+        console.log('response', response);
         if (response.ok) {
             console.log('Logout successful');
-            // Weiterleitung zum Login-Bildschirm oder einer anderen Seite
             window.location.href = 'index.html';
-            // Token aus dem Local Storage löschen
             localStorage.removeItem('token');
             localStorage.removeItem('username');
         } else {
             console.error('Logout failed');
-            // Handle logout failure
         }
     } catch (error) {
         console.error('Error:', error);
-        // Handle error
     }
 }
 

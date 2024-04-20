@@ -2,6 +2,12 @@
 let currentTasks = [];
 
 
+function init() {
+  loadAllTasksFromBackend();
+  const username = localStorage.getItem('username');
+  document.getElementById('loggedInUser').innerText += ` ${username}`;
+}
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
@@ -14,7 +20,7 @@ function drag(ev) {
 
 
 function drop(ev) {
-  
+
   ev.preventDefault();
   const data = ev.dataTransfer.getData("text");
   const dropZone = ev.target.id;
@@ -24,8 +30,9 @@ function drop(ev) {
   if (dropZone !== data && !dragElements.includes(dropZone)) {
     const task = currentTasks[indexOfCurrentTask];
     const newColumn = dropZone;
+    if(dropZone === 'todo' || dropZone === 'doToday' || dropZone === 'inProgress' || dropZone === 'done'){
     task.column = newColumn;
-   
+
     const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
     if (tasksInSameColumn.length === 0) {
       task.task_index = 1;
@@ -34,7 +41,7 @@ function drop(ev) {
       let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
       task.task_index = maxTaskIndex + 1;
       afterDropToBackend(ev, task.task_index);
-    }
+    }}
     clearColumn();
     loadAllTasks();
   }
@@ -45,18 +52,19 @@ function drop(ev) {
 function loadAllTasks() {
   document.getElementById('layOver').style.display = "none";
   const tasksByColumn = {};
+  console.log('vorher', tasksByColumn);
   for (const task of currentTasks) {
     if (!tasksByColumn[task.column]) {
       tasksByColumn[task.column] = [];
+      console.log('if', tasksByColumn);
     }
     tasksByColumn[task.column].push(task);
-
+    console.log('nachher', tasksByColumn);
   }
   renderTasks(tasksByColumn);
 }
 
-
-function renderTasks(tasksByColumn) {
+ function renderTasks(tasksByColumn) {
   for (const column in tasksByColumn) {
     if (tasksByColumn.hasOwnProperty(column)) {
       const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
@@ -64,11 +72,22 @@ function renderTasks(tasksByColumn) {
       for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
+        //const description = task.description ? task.description : '';
+        //const shortDescription = task.description && task.description.length > 10 ? task.description.substring(0, 10) + '...' : '';
+
         const description = task.description;
+        const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
+       //console.log('description',description);
         const taskIndex = task.task_index;
-        const createdAt = task.created_at;
+        const createdAt = formatCreatedAt(task.created_at);
         currentColumn.innerHTML += `
-                  <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>${title}</div>
+                  <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
+                     <div class="task-container">
+                       <span class="title-text">${title}</span>
+                       <span class="description-text">${shortDescription}</span>
+                       <span class="created-time">${createdAt}</span>
+                     </div> 
+                  </div>
               `;
       }
     }
@@ -76,7 +95,15 @@ function renderTasks(tasksByColumn) {
 }
 
 
-function openTaskPopUp(id, title, column, description, taskIndex, createdAt) {
+function formatCreatedAt(createdAt) {
+  const currentDate = new Date(createdAt);
+  const formattedTime = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')} ${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}`;
+  return formattedTime;
+}
+
+
+function openTaskPopUp(id,title,column,description,taskIndex,createdAt) {
+  console.log('taskPopUp',currentTasks);
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
   <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
@@ -104,25 +131,6 @@ function deleteTaskFrontend(id) {
     clearColumn();
     loadAllTasks();
     closeTaskPopUp();
-  }
-}
-
-
-
-async function deleteTaskBackend(id) {
-  try {
-      const csrftoken = getCSRFToken(); 
-      const response = await fetch(`http://127.0.0.1:8000/tasks/detail/${id}/`, {
-          method: 'DELETE',
-          headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrftoken  }});
-      if (!response.ok) {
-          throw new Error('Failed to delete task from backend.');
-         }
-      console.log('Task deleted successfully.');
-  } catch (error) {
-      console.error('Error deleting task from backend:', error.message);
   }
 }
 
@@ -163,10 +171,12 @@ async function addTask(column) {
 function newTaskObj(newId, newTaskIndex, column) {
   const title = document.getElementById('title').value;
   const description = document.getElementById('description').value;
+  const Formatdescription = description.length > 10 ? description.substring(0, 10) + '...' : description;
+
   return newTask = {
     id: newId,
     title: title,
-    description: description,
+    description: Formatdescription,
     column: column,
     task_index: newTaskIndex,
     created_at: timeAndDateFormat()
@@ -177,10 +187,14 @@ function newTaskObj(newId, newTaskIndex, column) {
 function timeAndDateFormat() {
   const currentDate = new Date();
   const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
-  const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
+  const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}`;
+
   const creationDateTime = `${formattedDate} ${formattedTime}`;
   return creationDateTime;
 }
+
+
+
 
 
 function clearColumn() {
@@ -189,6 +203,7 @@ function clearColumn() {
     document.getElementById(containerId).innerHTML = '';
   });
 }
+
 
 
 

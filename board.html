@@ -6,17 +6,15 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Board</title>
    <link rel="stylesheet" href="style.css">
-   <script src="script.js"></script>
-   <script src="tasks.js"></script>
-   <script src="backend.js"></script>
-   <script src="login.js"></script>
-   <script src="logout.js"></script>
+ 
+   <link rel="icon" type="image/png" href="img/favicon.ico">
 </head>
 
-<body onload="loadAllTasksFromBackend()">
+<body onload="init()">
 
    <header>
       <button onclick="logout()">Logout</button>
+      <h3 id="loggedInUser">User:</h3>
    </header>
 
    <main>
@@ -54,6 +52,12 @@
 
       </div>
    </div>
+
+
+   <script src="board.js"></script>
+   <script src="backend.js"></script>
+   <script src="login.js"></script>
+   <script src="logout.js"></script>
 
 </body>
 

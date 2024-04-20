@@ -102,24 +102,83 @@ function formatCreatedAt(createdAt) {
 }
 
 
-function openTaskPopUp(id,title,column,description,taskIndex,createdAt) {
-  console.log('taskPopUp',currentTasks);
+// function openTaskPopUp(id,title,column,description,taskIndex,createdAt) {
+//   console.log('taskPopUp',currentTasks);
+//   document.getElementById('layOver').style.display = "block";
+//   document.getElementById('taskPopUpDialog').innerHTML = `
+//   <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
+//   <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
+//   <div>ID: ${id}</div>
+//   <div>Title: <input type="text" id="editTitle" value="${title}"></div>
+//   <div>Column: ${column}</div>
+//   <div>Description: <textarea id="editDescription">${description}</textarea></div>
+//   <div>Task Index: ${taskIndex}</div>
+//   <div> createdAt: ${createdAt}</div>
+//   <button onclick="updateTask(${id}))">Save</button>
+//   `;
+// }
+
+
+// function updateTask(id) {
+//   const newTitle = document.getElementById('editTitle').value;
+//   const newDescription = document.getElementById('editDescription').value;
+// }
+
+
+function openTaskPopUp(id, title, column, description, taskIndex, createdAt) {
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
-  <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
-  <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
-  <div>ID: ${id}</div>
-  <div>Title: ${title}</div>
-  <div>Column: ${column}</div>
-  <div>Description: ${description}</div>
-  <div>Task Index: ${taskIndex}</div>
-  <div> createdAt: ${createdAt}</div>
+    <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
+    <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
+    <div>ID: ${id}</div>
+    <div>Title: <input type="text" id="editTitle" value="${title}" disabled></div>
+    <div>Column: ${column}</div>
+    <div>Description: <textarea id="editDescription" disabled>${description}</textarea></div>
+    <div>Task Index: ${taskIndex}</div>
+    <div> Created At: ${createdAt}</div>
+    <button id="editTask${id}" onclick="enableEditing(${id})">Edit</button>
+    <button id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})">Save</button>
   `;
 }
+
+function enableEditing(id) {
+  document.getElementById('editTitle').disabled = false;
+  document.getElementById('editDescription').disabled = false;
+  document.getElementById('updateTaskSave'+id).style.display="block";
+  document.getElementById('editTask'+id).style.display="none";
+  document.getElementById(id).style.opacity = 0.1;
+}
+
+function updateTask(id) {
+  const newTitle = document.getElementById('editTitle').value;
+  const newDescription = document.getElementById('editDescription').value;
+  document.getElementById('updateTaskSave'+id).style.display="none";
+  document.getElementById('editTask'+id).style.display="block";
+  document.getElementById('editTitle').disabled = true;
+  document.getElementById('editDescription').disabled = true;
+  currentTasksUpdate(id,newTitle,newDescription);
+  updateTaskBackend(id);
+}
+
+
+function currentTasksUpdate(id,newTitle,newDescription) {
+for (let index = 0; index < currentTasks.length; index++) {
+  const task = currentTasks[index];
+  const taskIdBackend = task.id;
+  if(taskIdBackend === id) {
+    task.title =  newTitle;
+    task.description = newDescription;
+  }
+}
+}
+
+
 
 
 function closeTaskPopUp() {
   document.getElementById('layOver').style.display = "none";
+  clearColumn();
+  loadAllTasks();
 }
 
 

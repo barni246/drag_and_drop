@@ -167,3 +167,34 @@ async function deleteTaskBackend(id) {
         console.error('Error deleting task from backend:', error.message);
     }
 }
+
+
+function updateTaskBackend(id) {
+    const newTitle = document.getElementById('editTitle').value;
+    const newDescription = document.getElementById('editDescription').value;
+  
+    const csrftoken = getCSRFToken(); // Stellen Sie sicher, dass Sie die CSRF-Token-Funktion haben
+  
+    fetch(`http://127.0.0.1:8000/tasks/edit/${id}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken // Fügen Sie den CSRF-Token dem Header hinzu
+      },
+      body: JSON.stringify({ title: newTitle, description: newDescription })
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log('Task updated successfully');
+        // Hier können Sie weitere Aktionen ausführen, z. B. eine Benachrichtigung anzeigen oder die Seite neu laden
+      } else {
+        console.error('Failed to update task');
+        // Handle error
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle error
+    });
+  }
+  

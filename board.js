@@ -146,7 +146,7 @@ function openTaskPopUp(id,title,column,description,createdAt,createdBy,updatedAt
   
     <div>
     <span class="font-size">Description:</span>
-     <textarea id="editDescription"  rows="10" cols="28" disabled>${description}</textarea>
+     <textarea id="editDescription"  rows="10" cols="30" disabled>${description}</textarea>
      </div>
     <div class="font-size show-column"><span class="load-text"> ${column}</span></div>
     <div class="font-size"> Created By: <span class="load-text"> ${createdBy}</span></div>
@@ -170,18 +170,6 @@ function enableEditing(id) {
 }
 
 
-// function updateTask(id) {
-//   const newTitle = document.getElementById('editTitle').value;
-//   const newDescription = document.getElementById('editDescription').value;
-//   document.getElementById('updateTaskSave' + id).style.display = "none";
-//   document.getElementById('editTask' + id).style.display = "block";
-//   document.getElementById('editTitle').disabled = true;
-//   document.getElementById('editDescription').disabled = true;
-//   updateTaskBackend(id);
-//   currentTasksUpdate(id, newTitle, newDescription);
-  
-// }
-
 
 function updateTask(id) {
   const newTitle = document.getElementById('editTitle').value;
@@ -196,9 +184,7 @@ function updateTask(id) {
         updateTaskBackend(id);
         currentTasksUpdate(id, newTitle, newDescription);
       } else {
-        editToggle(id);
-        console.log('Keine Änderungen vorgenommen.');
-       
+        editToggle(id);       
       }
     } 
   }
@@ -260,7 +246,7 @@ function createTask(column) {
           </div>
           <div>
           <span class="font-size">Description:</span>
-          <textarea placeholder="Description..." name="description" id="description" rows="15" cols="28" required></textarea>
+          <textarea placeholder="Description..." name="description" id="description" rows="15" cols="30" required></textarea>
           </div>
           <button id="createTaskBtn" type="submit">Create Task</button>
       </form>

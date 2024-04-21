@@ -165,7 +165,7 @@ function enableEditing(id) {
   document.getElementById('editTask' + id).style.display = "none";
   document.getElementById(id).style.opacity = 0.2;
   document.getElementById('delete'+id).disabled = true;
-  document.getElementById('delete'+id).style.opacity = 0.2;
+  document.getElementById('delete'+id).style.opacity = 0.6;
   document.getElementById('delete'+id).style.cursor = " not-allowed";
 }
 

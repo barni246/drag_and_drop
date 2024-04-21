@@ -8,23 +8,27 @@
     <script src="login.js"></script>
     <script src="logout.js"></script>
     <script src="backend.js"></script>
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="img/favicon.ico">
 </head>
 <body>
+    <main class="login-main">
     <h2>Login</h2>
-    <form onsubmit="event.preventDefault(); login()">
+    <form class="form" onsubmit="event.preventDefault(); login()">
         <div>
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" autocomplete="on">
+            <input type="text" id="username" name="username" autocomplete="on" required>
         </div>
         <div>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" autocomplete="on">
+            <input type="password" id="password" name="password" autocomplete="on" required>
         </div>
-        <button type="submit">Login</button>
+        <button id="loginBtn" type="submit">Login</button>
     </form>  
 
-<h3 onclick="toRegister()">New user?</h3>
+<h5 class="toRegister" onclick="toRegister()">New user ?</h5>
     <h2 style="color: red;" id="error-message-login"></h2>
+</main>
 </body>
 </html>

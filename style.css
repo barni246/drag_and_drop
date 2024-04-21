@@ -1,21 +1,33 @@
+:root {
+  --header-bg-color: blueviolet;
+  --text-color: blueviolet;
+  --btn-text-color: blueviolet;
+  --border-color: blueviolet;
+}
+
+
 body {
   width: 100vw;
   max-width: 100%;
   height: 100vh;
   margin: 0;
+  font-family: roboto;
 }
 
 header {
   height: 80px;
-  background-color: blueviolet;
+  background-color: var(--header-bg-color);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 
 main {
   display: flex;
+  justify-content: center;
 }
 
 
@@ -24,9 +36,8 @@ main {
   flex-direction: column;
   align-items: center;
   margin-top: 50px;
-  
-
 }
+
 
 .drop-area {
   float: left;
@@ -35,19 +46,32 @@ main {
   margin: 10px;
   padding: 10px;
   padding-top: 2px;
-  padding-bottom: 75px;
-  border: 4px solid blueviolet;
+  padding-bottom: 70px;
   display: flex;
   justify-content: start;
   flex-direction: column;
   align-items: center;
+  border: 2px solid var(--border-color);
+}
+
+
+
+@keyframes slideIn {
+  from {
+    padding-bottom: 0px;
+      
+  }
+  to {
+    padding-bottom: 75px;
+      
+  }
 }
 
 .drag {
   width: 133px;
   height: 60px;
-  border: 2px solid blue;
-  margin-bottom: 3px;
+  border: 2px solid gray;
+  margin-bottom: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,13 +95,9 @@ main {
   height: 450px;
   background-color: white;
   border-radius: 12px;
-  /* display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column; */
   font-size: 22px;
   font-weight: 700;
-  padding: 16px;
+  padding: 32px;
 
 }
 
@@ -87,18 +107,29 @@ main {
 
 #closeIcon {
   position: absolute;
-  right: 16px;
-  top: 16px;
+  right: 32px;
+  top: 32px;
   cursor: pointer;
 }
 
+.delete-icon {
+  position: absolute;
+  right: 32px;
+  bottom: 32px;
+  cursor: pointer;
+}
 
+button {
+  color: var(--btn-text-color);
+  cursor: pointer;
+}
 
 .task-container {
   display: flex;
   flex-direction: column;
   gap: 5px;
   align-items: center;
+  
 }
 
 .title-text {
@@ -112,4 +143,100 @@ main {
 
 .created-time {
   font-size: 8px;
+  color: var(--text-color);
+}
+
+.edit-btn,
+.save-btn {
+  position: absolute;
+  left: 32px;
+  bottom: 32px;
+  cursor: pointer;
+}
+
+#description {
+  resize: none;
+}
+
+#createTaskBtn {
+  margin-top: 16px;
+}
+
+.title-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  width: calc(100% - 32px);
+}
+
+#editDescription {
+  resize: none;
+}
+
+.font-size {
+font-size: 16px;
+color: black !important;
+}
+
+.load-text {
+  font-size: 15px;
+  color: var(--text-color);
+}
+
+
+.login-main, .register-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 100px;
+}
+
+.toRegister, .toLogin {
+  cursor: pointer;
+}
+
+.toRegister:hover, .toLogin:hover {
+  color:var(--text-color) ;
+}
+
+.form {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+  border: 1px solid gray;
+  border-radius: 3px;
+}
+
+.input-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  width: 300px;
+}
+
+#email-input {
+  margin-left: 38px;
+}
+
+#createUserBtn, #loginBtn {
+  margin-top: 16px;
+}
+
+textarea {
+  padding: 12px;
+  font-size: 16px;
+}
+
+.show-column {
+  position: absolute;
+  top: 32px;
+  left: 45%;
+  color: var(--text-color) !important;
 }

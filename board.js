@@ -1,4 +1,3 @@
-
 let currentTasks = [];
 
 
@@ -8,6 +7,7 @@ function init() {
   document.getElementById('loggedInUser').innerText += ` ${username}`;
 }
 
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
@@ -16,7 +16,6 @@ function allowDrop(ev) {
 function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
 }
-
 
 
 function drop(ev) {
@@ -30,41 +29,66 @@ function drop(ev) {
   if (dropZone !== data && !dragElements.includes(dropZone)) {
     const task = currentTasks[indexOfCurrentTask];
     const newColumn = dropZone;
-    if(dropZone === 'todo' || dropZone === 'doToday' || dropZone === 'inProgress' || dropZone === 'done'){
-    task.column = newColumn;
+    if (dropZone === 'todo' || dropZone === 'doToday' || dropZone === 'inProgress' || dropZone === 'done') {
+      task.column = newColumn;
 
-    const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
-    if (tasksInSameColumn.length === 0) {
-      task.task_index = 1;
-      afterDropToBackend(ev, task.task_index);
+      const tasksInSameColumn = currentTasks.filter(task => task.column === newColumn);
+      if (tasksInSameColumn.length === 0) {
+        task.task_index = 1;
+        afterDropToBackend(ev, task.task_index);
+      } else {
+        let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
+        task.task_index = maxTaskIndex + 1;
+        afterDropToBackend(ev, task.task_index);
+      }
     } else {
-      let maxTaskIndex = Math.max(...tasksInSameColumn.map(task => task.task_index));
-      task.task_index = maxTaskIndex + 1;
-      afterDropToBackend(ev, task.task_index);
-    }}
+      return
+    }
     clearColumn();
     loadAllTasks();
   }
 }
 
 
-
 function loadAllTasks() {
   document.getElementById('layOver').style.display = "none";
   const tasksByColumn = {};
-  console.log('vorher', tasksByColumn);
   for (const task of currentTasks) {
     if (!tasksByColumn[task.column]) {
       tasksByColumn[task.column] = [];
-      console.log('if', tasksByColumn);
     }
     tasksByColumn[task.column].push(task);
-    console.log('nachher', tasksByColumn);
   }
   renderTasks(tasksByColumn);
 }
 
- function renderTasks(tasksByColumn) {
+
+async function renderTasksFromBackend(tasksInColumn, column) {
+  const columnElement = document.getElementById(column);
+  columnElement.innerHTML = '';
+  for (const task of tasksInColumn) {
+    const title = task.title;
+    const id = task.id;
+    const description = task.description;
+    const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
+    const taskIndex = task.task_index;
+    const createdBy = await fetchTaskUsername(id);
+    const createdAt = formatCreatedAt(task.created_at);
+
+    columnElement.innerHTML += `
+          <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}','${createdBy}')" draggable="true" ondragstart="drag(event)" id=${id}>
+              <div class="task-container">
+                  <span class="title-text">${title}</span>
+                  <span class="description-text">${shortDescription}</span>
+                  <span class="created-time">${createdAt}</span>
+              </div>
+          </div>
+      `;
+  }
+}
+
+
+async function renderTasks(tasksByColumn) {
   for (const column in tasksByColumn) {
     if (tasksByColumn.hasOwnProperty(column)) {
       const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
@@ -72,16 +96,14 @@ function loadAllTasks() {
       for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
-        //const description = task.description ? task.description : '';
-        //const shortDescription = task.description && task.description.length > 10 ? task.description.substring(0, 10) + '...' : '';
-
+        const createdBy = await fetchTaskUsername(id);
         const description = task.description;
         const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
-       //console.log('description',description);
         const taskIndex = task.task_index;
+        const updatedAt = formatUpdatedAt(task.updated_at);
         const createdAt = formatCreatedAt(task.created_at);
         currentColumn.innerHTML += `
-                  <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${taskIndex}','${createdAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
+                  <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${createdAt}','${createdBy}','${updatedAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
                      <div class="task-container">
                        <span class="title-text">${title}</span>
                        <span class="description-text">${shortDescription}</span>
@@ -95,6 +117,16 @@ function loadAllTasks() {
 }
 
 
+function formatUpdatedAt(updatedAt) {
+  if (!updatedAt) {
+    return "---";
+  }else {
+    const formatedDateTime =  formatCreatedAt(updatedAt);
+    return formatedDateTime;
+  }
+}
+
+
 function formatCreatedAt(createdAt) {
   const currentDate = new Date(createdAt);
   const formattedTime = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')} ${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}`;
@@ -102,77 +134,101 @@ function formatCreatedAt(createdAt) {
 }
 
 
-// function openTaskPopUp(id,title,column,description,taskIndex,createdAt) {
-//   console.log('taskPopUp',currentTasks);
-//   document.getElementById('layOver').style.display = "block";
-//   document.getElementById('taskPopUpDialog').innerHTML = `
-//   <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
-//   <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
-//   <div>ID: ${id}</div>
-//   <div>Title: <input type="text" id="editTitle" value="${title}"></div>
-//   <div>Column: ${column}</div>
-//   <div>Description: <textarea id="editDescription">${description}</textarea></div>
-//   <div>Task Index: ${taskIndex}</div>
-//   <div> createdAt: ${createdAt}</div>
-//   <button onclick="updateTask(${id}))">Save</button>
-//   `;
-// }
+function openTaskPopUp(id,title,column,description,createdAt,createdBy,updatedAt) {
+  document.getElementById('layOver').style.display = "block";
+  document.getElementById('taskPopUpDialog').innerHTML = `
+    <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
+    <button class="delete-icon" id="delete${id}"  onclick="deleteTaskFrontend(${id})">Delete</button>
+     <div class="title-container">
+     <span class="font-size">Title:</span>
+     <input type="text" id="editTitle" value="${title}" disabled>
+     </div>
+  
+    <div>
+    <span class="font-size">Description:</span>
+     <textarea id="editDescription"  rows="10" cols="28" disabled>${description}</textarea>
+     </div>
+    <div class="font-size show-column"><span class="load-text"> ${column}</span></div>
+    <div class="font-size"> Created By: <span class="load-text"> ${createdBy}</span></div>
+    <div class="font-size"> Created At:<span class="load-text"> ${createdAt}</span></div>
+    <div class="font-size"> Updated At:<span class="load-text"> ${updatedAt}</span></div>
+    <button class="edit-btn" id="editTask${id}" onclick="enableEditing(${id})">Edit</button>
+    <button class="save-btn" id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})">Save</button>
+  `;
+}
+
+
+function enableEditing(id) {
+  document.getElementById('editTitle').disabled = false;
+  document.getElementById('editDescription').disabled = false;
+  document.getElementById('updateTaskSave' + id).style.display = "block";
+  document.getElementById('editTask' + id).style.display = "none";
+  document.getElementById(id).style.opacity = 0.2;
+  document.getElementById('delete'+id).disabled = true;
+  document.getElementById('delete'+id).style.opacity = 0.2;
+  document.getElementById('delete'+id).style.cursor = " not-allowed";
+}
 
 
 // function updateTask(id) {
 //   const newTitle = document.getElementById('editTitle').value;
 //   const newDescription = document.getElementById('editDescription').value;
+//   document.getElementById('updateTaskSave' + id).style.display = "none";
+//   document.getElementById('editTask' + id).style.display = "block";
+//   document.getElementById('editTitle').disabled = true;
+//   document.getElementById('editDescription').disabled = true;
+//   updateTaskBackend(id);
+//   currentTasksUpdate(id, newTitle, newDescription);
+  
 // }
 
-
-function openTaskPopUp(id, title, column, description, taskIndex, createdAt) {
-  document.getElementById('layOver').style.display = "block";
-  document.getElementById('taskPopUpDialog').innerHTML = `
-    <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
-    <button id="delete${id}" onclick="deleteTaskFrontend(${id})">Delete</button>
-    <div>ID: ${id}</div>
-    <div>Title: <input type="text" id="editTitle" value="${title}" disabled></div>
-    <div>Column: ${column}</div>
-    <div>Description: <textarea id="editDescription" disabled>${description}</textarea></div>
-    <div>Task Index: ${taskIndex}</div>
-    <div> Created At: ${createdAt}</div>
-    <button id="editTask${id}" onclick="enableEditing(${id})">Edit</button>
-    <button id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})">Save</button>
-  `;
-}
-
-function enableEditing(id) {
-  document.getElementById('editTitle').disabled = false;
-  document.getElementById('editDescription').disabled = false;
-  document.getElementById('updateTaskSave'+id).style.display="block";
-  document.getElementById('editTask'+id).style.display="none";
-  document.getElementById(id).style.opacity = 0.1;
-}
 
 function updateTask(id) {
   const newTitle = document.getElementById('editTitle').value;
   const newDescription = document.getElementById('editDescription').value;
-  document.getElementById('updateTaskSave'+id).style.display="none";
-  document.getElementById('editTask'+id).style.display="block";
-  document.getElementById('editTitle').disabled = true;
-  document.getElementById('editDescription').disabled = true;
-  currentTasksUpdate(id,newTitle,newDescription);
-  updateTaskBackend(id);
-}
-
-
-function currentTasksUpdate(id,newTitle,newDescription) {
-for (let index = 0; index < currentTasks.length; index++) {
-  const task = currentTasks[index];
-  const taskIdBackend = task.id;
-  if(taskIdBackend === id) {
-    task.title =  newTitle;
-    task.description = newDescription;
+  for (let index = 0; index < currentTasks.length; index++) {
+    const task = currentTasks[index];
+    if(task.id === id) {
+      const currentTitle = task.title;
+      const currentDescription = task.description;
+      if (newTitle !== currentTitle || newDescription !== currentDescription) {
+        editToggle(id);
+        updateTaskBackend(id);
+        currentTasksUpdate(id, newTitle, newDescription);
+      } else {
+        editToggle(id);
+        console.log('Keine Änderungen vorgenommen.');
+       
+      }
+    } 
   }
 }
+
+
+function editToggle(id) {
+  document.getElementById('updateTaskSave' + id).style.display = "none";
+  document.getElementById('editTask' + id).style.display = "block";
+  document.getElementById('editTitle').disabled = true;
+  document.getElementById('editDescription').disabled = true;
+  document.getElementById('delete'+id).disabled = false;
+  document.getElementById('delete'+id).style.opacity = 1;
+  document.getElementById('delete'+id).style.cursor = "pointer";
 }
 
 
+
+ function currentTasksUpdate(id, newTitle, newDescription) {
+  for (let index = 0; index < currentTasks.length; index++) {
+    const task = currentTasks[index];
+    const taskIdBackend = task.id;
+    if (taskIdBackend === id) {
+      task.title = newTitle;
+      task.description = newDescription;
+     
+    }
+
+  }
+}
 
 
 function closeTaskPopUp() {
@@ -187,8 +243,6 @@ function deleteTaskFrontend(id) {
   if (index !== -1) {
     currentTasks.splice(index, 1);
     deleteTaskBackend(id);
-    clearColumn();
-    loadAllTasks();
     closeTaskPopUp();
   }
 }
@@ -199,9 +253,16 @@ function createTask(column) {
   document.getElementById('taskPopUpDialog').innerHTML = `
       <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
       <form onsubmit="event.preventDefault(); addTask('${column}')">
+          <div class="title-container">
+          <span class="font-size show-column">${column}</span>
+          <span class="font-size">Title:</span>
           <input placeholder="Title..." name="title" id="title" type="text" required>
-          <input placeholder="Description..." name="description" id="description" type="text" required>
-          <button type="submit">Create Task</button>
+          </div>
+          <div>
+          <span class="font-size">Description:</span>
+          <textarea placeholder="Description..." name="description" id="description" rows="15" cols="28" required></textarea>
+          </div>
+          <button id="createTaskBtn" type="submit">Create Task</button>
       </form>
   `;
 }
@@ -220,25 +281,21 @@ async function addTask(column) {
   const newId = await createTaskBackendAndGetId(newTaskObjToBackend);
   let newTaskObjToFrontend = newTaskObj(newId, newTaskIndex, column);
   currentTasks.push(newTaskObjToFrontend);
-  clearColumn();
-  loadAllTasks();
   closeTaskPopUp();
-  console.log('currentTasks addTask: ', currentTasks);
 }
 
 
 function newTaskObj(newId, newTaskIndex, column) {
   const title = document.getElementById('title').value;
   const description = document.getElementById('description').value;
-  const Formatdescription = description.length > 10 ? description.substring(0, 10) + '...' : description;
-
   return newTask = {
     id: newId,
     title: title,
-    description: Formatdescription,
+    description: description,
     column: column,
     task_index: newTaskIndex,
-    created_at: timeAndDateFormat()
+    created_at: timeAndDateFormat(),
+    created_by: getUserName()
   };
 }
 
@@ -247,13 +304,9 @@ function timeAndDateFormat() {
   const currentDate = new Date();
   const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
   const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}`;
-
   const creationDateTime = `${formattedDate} ${formattedTime}`;
   return creationDateTime;
 }
-
-
-
 
 
 function clearColumn() {

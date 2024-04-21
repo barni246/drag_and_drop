@@ -6,6 +6,7 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Board</title>
    <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="fonts.css">
  
    <link rel="icon" type="image/png" href="img/favicon.ico">
 </head>
@@ -13,34 +14,37 @@
 <body onload="init()">
 
    <header>
+      <h3 id="loggedInUser">User:</h3> 
       <button onclick="logout()">Logout</button>
-      <h3 id="loggedInUser">User:</h3>
    </header>
 
    <main>
 
       <div class="column-wrapper">
          <button onclick="createTask('todo')">New Task</button>
-         <h2>Todo</h2>
-         <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+         <h3>Todo</h3>
+         <div class="barni">
+             <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+         </div>
+        
       </div>
      
 
       <div class="column-wrapper">
          <button onclick="createTask('doToday')">New Task</button>
-         <h2>Do Today</h2>
+         <h3>Do Today</h3>
          <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
          <button onclick="createTask('inProgress')">New Task</button>
-         <h2>In Progress</h2>
+         <h3>In Progress</h3>
          <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
          <button onclick="createTask('done')">New Task</button>
-         <h2>Done</h2>
+         <h3>Done</h3>
          <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 

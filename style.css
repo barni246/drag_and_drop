@@ -347,3 +347,8 @@ transition: all 175ms ease-in-out;
   filter: invert(50%);
   transition: all 175ms ease-in-out;
 }
+
+.button-wrapper {
+  border: unset;
+  background-color: unset;
+}

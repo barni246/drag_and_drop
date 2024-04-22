@@ -248,7 +248,7 @@ function createTask(column) {
           <span class="font-size">Description:</span>
           <textarea placeholder="Description..." name="description" id="description" rows="15" cols="30" required></textarea>
           </div>
-          <img id="createTaskBtn" title="create new task" type="submit" src="img/create.png" alt="">
+        <button class="button-wrapper">  <img id="createTaskBtn" title="create new task" type="submit" src="img/create.png" alt=""> </button>
       </form>
   `;
 }

@@ -98,8 +98,8 @@ main {
   position: relative;
   left: calc(50% - 175px);
   top: calc(50% - 225px);
-  width: 450px;
-  height: 550px;
+  width: 350px;
+  height: 450px;
   background-color: white;
   background-color: lightgray;
   border-radius: 12px;

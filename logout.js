@@ -6,7 +6,7 @@ async function logout() {
     }
 
     try {
-        const csrftoken = getCSRFTokenFromCookie();
+        const csrftoken =  getCSRFToken();
 
         const response = await fetch('http://127.0.0.1:8000/logout/', {
             method: 'POST',
@@ -39,3 +39,15 @@ function getCSRFTokenFromCookie() {
     }
     return null;
 }
+
+
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+     for (let i = 0; i < cookies.length; i++) {
+         const cookie = cookies[i].trim();
+         if (cookie.startsWith('csrftoken=')) {
+             return  cookie.substring('csrftoken='.length, cookie.length);
+         }
+     }
+     return null;
+ }

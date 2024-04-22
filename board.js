@@ -137,8 +137,8 @@ function formatCreatedAt(createdAt) {
 function openTaskPopUp(id,title,column,description,createdAt,createdBy,updatedAt) {
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
-    <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
-    <button class="delete-icon" id="delete${id}"  onclick="deleteTaskFrontend(${id})">Delete</button>
+    <img class="closeIcon" onclick="closeTaskPopUp()"  src="img/exit.png" title="exit">
+    <img  class="delete-icon" id="delete${id}"  onclick="deleteTaskFrontend(${id})" src="img/delete.png" title="delete task">
      <div class="title-container">
      <span class="font-size">Title:</span>
      <input type="text" id="editTitle" value="${title}" disabled>
@@ -152,7 +152,7 @@ function openTaskPopUp(id,title,column,description,createdAt,createdBy,updatedAt
     <div class="font-size"> Created By: <span class="load-text"> ${createdBy}</span></div>
     <div class="font-size"> Created At:<span class="load-text"> ${createdAt}</span></div>
     <div class="font-size"> Updated At:<span class="load-text"> ${updatedAt}</span></div>
-    <button class="edit-btn" id="editTask${id}" onclick="enableEditing(${id})">Edit</button>
+    <img title="edit task" class="edit-icon" id="editTask${id}" onclick="enableEditing(${id})" src="img/edit.png" alt="">
     <button class="save-btn" id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})">Save</button>
   `;
 }
@@ -237,7 +237,7 @@ function deleteTaskFrontend(id) {
 function createTask(column) {
   document.getElementById('layOver').style.display = "block";
   document.getElementById('taskPopUpDialog').innerHTML = `
-      <button id="closeIcon" onclick="closeTaskPopUp()">X</button>
+      <img class="closeIcon" onclick="closeTaskPopUp()" id="closeIcon" src="img/exit.png" title="exit">
       <form onsubmit="event.preventDefault(); addTask('${column}')">
           <div class="title-container">
           <span class="font-size show-column">${column}</span>
@@ -248,7 +248,7 @@ function createTask(column) {
           <span class="font-size">Description:</span>
           <textarea placeholder="Description..." name="description" id="description" rows="15" cols="30" required></textarea>
           </div>
-          <button id="createTaskBtn" type="submit">Create Task</button>
+          <img id="createTaskBtn" title="create new task" type="submit" src="img/create.png" alt="">
       </form>
   `;
 }

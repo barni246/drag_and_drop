@@ -7,21 +7,23 @@
    <title>Board</title>
    <link rel="stylesheet" href="style.css">
    <link rel="stylesheet" href="fonts.css">
- 
    <link rel="icon" type="image/png" href="img/favicon.ico">
 </head>
 
 <body onload="init()">
 
    <header>
-      <h3 id="loggedInUser">User:</h3> 
-      <button onclick="logout()">Logout</button>
+      <div id="userContainer">
+          <img title="logged in user" src="img/user.png" alt="">
+          <span title="logged in user" id="loggedInUser"></span> 
+      </div>
+      <img id="logout" onclick="logout()" src="img/logout.png" title="Logout" >
    </header>
 
    <main>
-
+ 
       <div class="column-wrapper">
-         <button onclick="createTask('todo')">New Task</button>
+         <img class="addBtn" title="add new task"  onclick="createTask('todo')" src="img/add.png">
          <h3>Todo</h3>
          <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         
@@ -29,19 +31,19 @@
      
 
       <div class="column-wrapper">
-         <button onclick="createTask('doToday')">New Task</button>
+         <img class="addBtn" title="add new task" onclick="createTask('doToday')" src="img/add.png">
          <h3>Do Today</h3>
          <div id="doToday" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
-         <button onclick="createTask('inProgress')">New Task</button>
+         <img class="addBtn" title="add new task" onclick="createTask('inProgress')" src="img/add.png">
          <h3>In Progress</h3>
          <div id="inProgress" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>
 
       <div class="column-wrapper">
-         <button onclick="createTask('done')">New Task</button>
+         <img class="addBtn" title="add new task" onclick="createTask('done')" src="img/add.png">
          <h3>Done</h3>
          <div id="done" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
       </div>

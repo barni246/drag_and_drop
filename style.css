@@ -2,7 +2,7 @@
   --header-bg-color: blueviolet;
   --text-color: blueviolet;
   --btn-text-color: blueviolet;
-  --border-color: blueviolet;
+  --border-color: #8a2be2;
 }
 
 
@@ -83,6 +83,22 @@ main {
   margin-bottom: 3px;
   padding: 8px;
   box-sizing:border-box ;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
+}
+
+.drag:hover {
+  background-color: #8a2be2;
+  transition: all 175ms ease-in-out;
+  color: white !important;
+}
+
+.drag:hover .title-text,
+.drag:hover .description-text,
+.drag:hover .created-time {
+  background-color: #8a2be2;
+  transition: all 175ms ease-in-out;
+  color: white !important;
 }
 
 .lay-over {
@@ -252,4 +268,82 @@ textarea {
 
 #editTitle, #title {
   width: calc(100% - -24px);
+}
+
+.addBtn {
+cursor: pointer;
+transition: all 175ms ease-in-out;
+}
+
+.addBtn:hover {
+  opacity: 0.6;
+  transition: all 175ms ease-in-out;
+  }
+
+#logout {
+  height: 40px;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
+}
+
+#logout:hover {
+  filter: invert(100%);
+  transition: all 175ms ease-in-out;
+}
+
+#userContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#userContainer>img {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+
+#loggedInUser {
+  font-size: 25px;
+}
+
+#createTaskBtn, .closeIcon {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
+}
+
+.closeIcon {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  right: 32px;
+  top: 32px;
+ 
+}
+
+#createTaskBtn:hover,
+ .closeIcon:hover {
+  filter: invert(50%);
+  transition: all 175ms ease-in-out;
+}
+
+.edit-icon, .delete-icon {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
+}
+
+.edit-icon {
+  position: absolute;
+  left: 32px;
+  bottom: 32px;
+}
+
+.edit-icon:hover, .delete-icon:hover {
+  filter: invert(50%);
+  transition: all 175ms ease-in-out;
 }

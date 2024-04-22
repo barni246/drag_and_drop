@@ -152,8 +152,8 @@ function openTaskPopUp(id,title,column,description,createdAt,createdBy,updatedAt
     <div class="font-size"> Created By: <span class="load-text"> ${createdBy}</span></div>
     <div class="font-size"> Created At:<span class="load-text"> ${createdAt}</span></div>
     <div class="font-size"> Updated At:<span class="load-text"> ${updatedAt}</span></div>
-    <img title="edit task" class="edit-icon" id="editTask${id}" onclick="enableEditing(${id})" src="img/edit.png" alt="">
-    <button class="save-btn" id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})">Save</button>
+    <img title="edit task" class="edit-icon" id="editTask${id}" onclick="enableEditing(${id})" src="img/edit.png">
+    <img title="save" class="edit-icon save-btn" id="updateTaskSave${id}" style="display: none" onclick="updateTask(${id})" src="img/save.png">
   `;
 }
 

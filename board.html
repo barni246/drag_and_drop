@@ -14,21 +14,21 @@
 
    <header>
       <div id="userContainer">
-          <img title="logged in user" src="img/user.png" alt="">
-          <span title="logged in user" id="loggedInUser"></span> 
+         <img title="logged in user" src="img/user.png" alt="">
+         <span title="logged in user" id="loggedInUser"></span>
       </div>
-      <img id="logout" onclick="logout()" src="img/logout.png" title="Logout" >
+      <img id="logout" onclick="logout()" src="img/logout.png" title="Logout">
    </header>
 
    <main>
- 
+
       <div class="column-wrapper">
-         <img class="addBtn" title="add new task"  onclick="createTask('todo')" src="img/add.png">
+         <img class="addBtn" title="add new task" onclick="createTask('todo')" src="img/add.png">
          <h3>Todo</h3>
          <div id="todo" class="drop-area" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        
+
       </div>
-     
+
 
       <div class="column-wrapper">
          <img class="addBtn" title="add new task" onclick="createTask('doToday')" src="img/add.png">

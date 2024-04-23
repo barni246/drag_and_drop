@@ -13,7 +13,6 @@ async function login() {
             },
             body: JSON.stringify({ username, password })
         });
-
         if (response.ok) {
             const data = await response.json();
             if (data.token) {
@@ -36,7 +35,6 @@ async function login() {
 }
 
 
-
  function getCSRFToken() {
    const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -53,28 +51,3 @@ function toRegister() {
     window.location.href = 'register.html';
 }
 
-
-// csak ha kell a kesöbbiekben
-function fetchTasks() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.error('Token not found in localStorage');
-        return;
-    }
-
-    fetch('http://127.0.0.1:8000/tasks/', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Verwenden Sie das Token im Authorization-Header
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            // Verarbeiten Sie die Antwort vom Server
-            console.log('Tasks:', data);
-        })
-        .catch(error => {
-            console.error('Error fetching tasks:', error);
-        });
-}

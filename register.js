@@ -23,6 +23,7 @@ async function create_new_user() {
     }
   }
 
+  
   function toLogin() {
     window.location.href = 'index.html';
   }

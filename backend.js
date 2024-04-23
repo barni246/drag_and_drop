@@ -40,11 +40,9 @@ async function renderTasksFromBackend(tasksInColumn, column) {
         const description = task.description;
         const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
         const taskIndex = task.task_index;
-        //const createdBy = task.created_by;
         const updatedAt = formatUpdatedAt(task.updated_at);
         const createdBy = await fetchTaskUsername(id);
-        const createdAt = formatCreatedAt(task.created_at); // Formatieren Sie das erstellte Datum
-
+        const createdAt = formatCreatedAt(task.created_at);
         columnElement.innerHTML += `
             <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${createdAt}','${createdBy}','${updatedAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
                 <div class="task-container">
@@ -56,7 +54,6 @@ async function renderTasksFromBackend(tasksInColumn, column) {
         `;
     }
 }
-
 
 
 async function afterDropToBackend(ev, newTaskIndex) {
@@ -172,35 +169,31 @@ async function deleteTaskBackend(id) {
 async function updateTaskBackend(id) {
     const newTitle = document.getElementById('editTitle').value;
     const newDescription = document.getElementById('editDescription').value;
-  
-    const csrftoken = getCSRFToken(); // Stellen Sie sicher, dass Sie die CSRF-Token-Funktion haben
-  
+
+    const csrftoken = getCSRFToken();
+
     await fetch(`http://127.0.0.1:8000/tasks/edit/${id}/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken // Fügen Sie den CSRF-Token dem Header hinzu
-      },
-      body: JSON.stringify({ title: newTitle, description: newDescription })
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ title: newTitle, description: newDescription })
     })
-    .then(response => {
-      if (response.ok) {
-        console.log('Task updated successfully');
-        // Hier können Sie weitere Aktionen ausführen, z. B. eine Benachrichtigung anzeigen oder die Seite neu laden
-      } else {
-        console.error('Failed to update task');
-        // Handle error
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      // Handle error
-    });
-  }
+        .then(response => {
+            if (response.ok) {
+                console.log('Task updated successfully');
+            } else {
+                console.error('Failed to update task');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
 
 
-  
-  async function fetchTaskUsername(taskId) {
+async function fetchTaskUsername(taskId) {
     try {
         const response = await fetch(`http://127.0.0.1:8000/tasks/${taskId}/`);
         if (!response.ok) {
@@ -211,18 +204,18 @@ async function updateTaskBackend(id) {
         return username;
     } catch (error) {
         console.error('Error fetching task username:', error);
-        throw error; 
+        throw error;
     }
 }
 
 
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
-     for (let i = 0; i < cookies.length; i++) {
-         const cookie = cookies[i].trim();
-         if (cookie.startsWith('csrftoken=')) {
-             return  cookie.substring('csrftoken='.length, cookie.length);
-         }
-     }
-     return null;
- }
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
+        }
+    }
+    return null;
+}

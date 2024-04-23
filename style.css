@@ -1,7 +1,8 @@
 :root {
-  --header-bg-color: blueviolet;
-  --text-color: blueviolet;
-  --btn-text-color: blueviolet;
+  --header-bg-color: #8a2be2;
+  --hover-bg-color: #8a2be2;
+  --text-color: #8a2be2;
+  --btn-text-color: #8a2be2;
   --border-color: #8a2be2;
 }
 
@@ -14,6 +15,7 @@ body {
   font-family: roboto;
   background-color: rgba(0, 0, 0, 0.15);
 }
+
 
 header {
   height: 80px;
@@ -58,18 +60,6 @@ main {
   }
 
 
-
-@keyframes slideIn {
-  from {
-    padding-bottom: 0px;
-      
-  }
-  to {
-    padding-bottom: 75px;
-      
-  }
-}
-
 .drag {
   width: 133px;
   width: 100%;
@@ -87,19 +77,22 @@ main {
   transition: all 175ms ease-in-out;
 }
 
+
 .drag:hover {
-  background-color: #8a2be2;
+  background-color: var(--hover-bg-color);
   transition: all 175ms ease-in-out;
   color: white !important;
 }
 
+
 .drag:hover .title-text,
 .drag:hover .description-text,
 .drag:hover .created-time {
-  background-color: #8a2be2;
+  background-color: var(--hover-bg-color);
   transition: all 175ms ease-in-out;
   color: white !important;
 }
+
 
 .lay-over {
   position: fixed;
@@ -118,7 +111,6 @@ main {
   height: 450px;
   background-color: white;
   background-color: lightgray;
-  border-radius: 12px;
   font-size: 22px;
   font-weight: 700;
   padding: 32px;
@@ -178,30 +170,21 @@ button {
   cursor: pointer;
 }
 
-#description {
-  resize: none;
-}
-
-#createTaskBtn {
-  margin-top: 16px;
-}
 
 .title-container {
   display: flex;
   flex-direction: column;
-  margin-top: 16px;
+  margin-top: 48px;
   margin-bottom: 8px;
   width: calc(100% - 32px);
 }
 
-#editDescription {
-  resize: none;
-}
 
 .font-size {
 font-size: 16px;
 color: black !important;
 }
+
 
 .load-text {
   font-size: 15px;
@@ -217,13 +200,16 @@ color: black !important;
   margin-top: 100px;
 }
 
+
 .toRegister, .toLogin {
   cursor: pointer;
 }
 
+
 .toRegister:hover, .toLogin:hover {
   color:var(--text-color) ;
 }
+
 
 .form {
   display: flex;
@@ -236,6 +222,7 @@ color: black !important;
   border-radius: 3px;
 }
 
+
 .input-wrapper {
   display: flex;
   justify-content: space-between;
@@ -245,18 +232,48 @@ color: black !important;
   width: 300px;
 }
 
+
 #email-input {
   margin-left: 38px;
 }
 
-#createUserBtn, #loginBtn {
+
+#loginBtn {
   margin-top: 16px;
+  width: 60px;
+  height: 30px;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
 }
+
+
+#createTaskBtn {
+  position: absolute;
+  right: 32px;
+  bottom: 32px;
+  width: 40px;
+  height: 35px;
+  cursor: pointer;
+  transition: all 175ms ease-in-out;
+}
+
 
 textarea {
   padding: 12px;
   font-size: 16px;
   width: calc(100% - 28px);
+  resize: none;
+  border: none;
+  outline: none;
+}
+
+
+#title, #editTitle {
+  resize: none;
+  border: none;
+  outline: none;
+  height: 25px;
+  padding-left: 12px;
 }
 
 .show-column {
@@ -266,19 +283,23 @@ textarea {
   color: var(--text-color) !important;
 }
 
+
 #editTitle, #title {
-  width: calc(100% - -24px);
+  width: calc(100% - -16px);
 }
+
 
 .addBtn {
 cursor: pointer;
 transition: all 175ms ease-in-out;
 }
 
+
 .addBtn:hover {
-  opacity: 0.6;
+  scale: 1.15;
   transition: all 175ms ease-in-out;
   }
+
 
 #logout {
   height: 40px;
@@ -286,16 +307,19 @@ transition: all 175ms ease-in-out;
   transition: all 175ms ease-in-out;
 }
 
+
 #logout:hover {
   filter: invert(100%);
   transition: all 175ms ease-in-out;
 }
+
 
 #userContainer {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 
 #userContainer>img {
   width: 40px;
@@ -308,12 +332,14 @@ transition: all 175ms ease-in-out;
   font-size: 25px;
 }
 
-#createTaskBtn, .closeIcon {
+
+.closeIcon {
   width: 45px;
   height: 45px;
   cursor: pointer;
   transition: all 175ms ease-in-out;
 }
+
 
 .closeIcon {
   width: 32px;
@@ -321,21 +347,23 @@ transition: all 175ms ease-in-out;
   position: absolute;
   right: 32px;
   top: 32px;
- 
-}
+ }
+
 
 #createTaskBtn:hover,
  .closeIcon:hover {
-  filter: invert(50%);
+  scale: 1.15;
   transition: all 175ms ease-in-out;
 }
 
+
 .edit-icon, .delete-icon {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   cursor: pointer;
   transition: all 175ms ease-in-out;
 }
+
 
 .edit-icon {
   position: absolute;
@@ -343,10 +371,12 @@ transition: all 175ms ease-in-out;
   bottom: 32px;
 }
 
+
 .edit-icon:hover, .delete-icon:hover {
-  filter: invert(50%);
+  scale: 1.15;
   transition: all 175ms ease-in-out;
 }
+
 
 .button-wrapper {
   border: unset;

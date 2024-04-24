@@ -2,14 +2,12 @@
 async function login() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const csrftoken = getCSRFToken();
-
     try {
         const response = await fetch('http://127.0.0.1:8000/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
+                'X-CSRFToken': `${getCSRFToken()}`
             },
             body: JSON.stringify({ username, password })
         });
@@ -32,18 +30,6 @@ async function login() {
         console.error('Error:', error);
         document.getElementById('error-message-login').innerText = 'Error: ' + error.message; // Fehlermeldung anzeigen
     }
-}
-
-
- function getCSRFToken() {
-   const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith('csrftoken=')) {
-            return  cookie.substring('csrftoken='.length, cookie.length);
-        }
-    }
-    return null;
 }
 
 

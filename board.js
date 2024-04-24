@@ -76,7 +76,7 @@ async function renderTasks(tasksByColumn) {
       for (const task of tasksInColumn) {
         const title = task.title;
         const id = task.id;
-        const createdBy = await fetchTaskUsername(id);
+        const createdBy = await getCreatedBy(id);
         const description = task.description;
         const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
         const taskIndex = task.task_index;

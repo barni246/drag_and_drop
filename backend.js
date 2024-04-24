@@ -1,34 +1,38 @@
 
 function loadAllTasksFromBackend() {
     document.getElementById('layOver').style.display = "none";
-    fetch('http://127.0.0.1:8000/tasks/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            currentTasks = data;
-            const tasksByColumn = {};
-            for (const task of currentTasks) {
-                if (!tasksByColumn[task.column]) {
-                    tasksByColumn[task.column] = [];
-                }
-                tasksByColumn[task.column].push(task);
-            }
-            for (const column in tasksByColumn) {
-                if (tasksByColumn.hasOwnProperty(column)) {
-                    const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
-                    renderTasksFromBackend(tasksInColumn, column);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-}
 
+    fetch('http://127.0.0.1:8000/tasks/', {
+        headers: {
+            'Authorization': `Token ${getToken()}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        currentTasks = data;
+        const tasksByColumn = {};
+        for (const task of currentTasks) {
+            if (!tasksByColumn[task.column]) {
+                tasksByColumn[task.column] = [];
+            }
+            tasksByColumn[task.column].push(task);
+        }
+        for (const column in tasksByColumn) {
+            if (tasksByColumn.hasOwnProperty(column)) {
+                const tasksInColumn = tasksByColumn[column].sort((a, b) => a.task_index - b.task_index);
+                renderTasksFromBackend(tasksInColumn, column);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 
 
 async function renderTasksFromBackend(tasksInColumn, column) {
@@ -41,7 +45,7 @@ async function renderTasksFromBackend(tasksInColumn, column) {
         const shortDescription = task.description.length > 10 ? task.description.substring(0, 10) + '...' : task.description;
         const taskIndex = task.task_index;
         const updatedAt = formatUpdatedAt(task.updated_at);
-        const createdBy = await fetchTaskUsername(id);
+        const createdBy = await getCreatedBy(id);
         const createdAt = formatCreatedAt(task.created_at);
         columnElement.innerHTML += `
             <div class="drag" onclick="openTaskPopUp('${id}','${title}','${column}','${description}','${createdAt}','${createdBy}','${updatedAt}')" draggable="true" ondragstart="drag(event)" id=${id}>
@@ -67,12 +71,12 @@ async function afterDropToBackend(ev, newTaskIndex) {
         task_index: newTaskIndex
     };
     try {
-        const csrftoken = getCSRFToken();
-        const response = await fetch(`http://127.0.0.1:8000/tasks/drop/${task.id}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/tasks/crud/${task.id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
+                'Authorization': `Token ${getToken()}`,
+                'X-CSRFToken': `${getCSRFToken()}`
             },
             body: JSON.stringify(updateData)
         });
@@ -100,18 +104,40 @@ async function getUserIdByUsername(username) {
 }
 
 
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+     for (let i = 0; i < cookies.length; i++) {
+         const cookie = cookies[i].trim();
+         if (cookie.startsWith('csrftoken=')) {
+             return  cookie.substring('csrftoken='.length, cookie.length);
+         }
+     }
+     return null;
+ }
+
+ 
+function getToken() {
+    const token = localStorage.getItem('token');
+    if(token) {
+        return token;
+    }else {
+        console.log("Token ist nicht vorhanden in Local Storage!")
+    }
+}
+
+
 async function createTaskBackendAndGetId(taskData) {
     try {
         const username = taskData.created_by;
         const userId = await getUserIdByUsername(username);
-        const csrftoken = getCSRFToken();
         taskData.created_by = userId;
 
         const response = await fetch('http://127.0.0.1:8000/tasks/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
+                'Authorization': `Token ${getToken()}`,
+                'X-CSRFToken': `${getCSRFToken()}`
             },
             body: JSON.stringify(taskData)
         });
@@ -148,12 +174,12 @@ function getUserName() {
 
 async function deleteTaskBackend(id) {
     try {
-        const csrftoken = getCSRFToken();
-        const response = await fetch(`http://127.0.0.1:8000/tasks/detail/${id}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/tasks/crud/${id}/`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Token ${getToken()}`,
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
+                'X-CSRFToken': `${getCSRFToken()}`
             }
         });
         if (!response.ok) {
@@ -169,14 +195,12 @@ async function deleteTaskBackend(id) {
 async function updateTaskBackend(id) {
     const newTitle = document.getElementById('editTitle').value;
     const newDescription = document.getElementById('editDescription').value;
-
-    const csrftoken = getCSRFToken();
-
-    await fetch(`http://127.0.0.1:8000/tasks/edit/${id}/`, {
+    await fetch(`http://127.0.0.1:8000/tasks/crud/${id}/`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
+            'Authorization': `Token ${getToken()}`,
+            'X-CSRFToken': `${getCSRFToken()}`
         },
         body: JSON.stringify({ title: newTitle, description: newDescription })
     })
@@ -193,7 +217,7 @@ async function updateTaskBackend(id) {
 }
 
 
-async function fetchTaskUsername(taskId) {
+async function getCreatedBy(taskId) {
     try {
         const response = await fetch(`http://127.0.0.1:8000/tasks/${taskId}/`);
         if (!response.ok) {
@@ -208,14 +232,3 @@ async function fetchTaskUsername(taskId) {
     }
 }
 
-
-function getCSRFToken() {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith('csrftoken=')) {
-            return cookie.substring('csrftoken='.length, cookie.length);
-        }
-    }
-    return null;
-}

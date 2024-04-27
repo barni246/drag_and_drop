@@ -20,15 +20,15 @@ async function login() {
                 window.location.href = 'board.html';
             } else {
                 console.error('Login failed');
-                document.getElementById('error-message-login').innerText = 'Login failed'; // Fehlermeldung anzeigen
+                document.getElementById('error-message-login').innerText = 'Login failed'; 
             }
         } else {
             console.error('Login failed');
-            document.getElementById('error-message-login').innerText = 'Login failed'; // Fehlermeldung anzeigen
+            document.getElementById('error-message-login').innerText = 'Login failed'; 
         }
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('error-message-login').innerText = 'Error: ' + error.message; // Fehlermeldung anzeigen
+        document.getElementById('error-message-login').innerText = 'Error: ' + error.message; 
     }
 }
 

@@ -71,7 +71,7 @@ async function afterDropToBackend(ev, newTaskIndex) {
         task_index: newTaskIndex
     };
     try {
-        const response = await fetch(`http://127.0.0.1:8000/tasks/crud/${task.id}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/tasks/update/${task.id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ function getUserName() {
 
 async function deleteTaskBackend(id) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/tasks/crud/${id}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/tasks/update/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Token ${getToken()}`,
@@ -195,7 +195,7 @@ async function deleteTaskBackend(id) {
 async function updateTaskBackend(id) {
     const newTitle = document.getElementById('editTitle').value;
     const newDescription = document.getElementById('editDescription').value;
-    await fetch(`http://127.0.0.1:8000/tasks/crud/${id}/`, {
+    await fetch(`http://127.0.0.1:8000/tasks/update/${id}/`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

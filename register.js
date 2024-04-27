@@ -7,7 +7,6 @@ async function create_new_user() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': `${getCSRFToken()}`
         },
         body: JSON.stringify({ newUsername, newPassword, newEmail })
     });

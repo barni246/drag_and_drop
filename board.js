@@ -153,7 +153,7 @@ function enableEditing(id) {
 
 function updateTask(id) {
   toggleEditable();
-  closeTaskPopUp();
+ // closeTaskPopUp();
   const newTitle = document.getElementById('editTitle').value;
   const newDescription = document.getElementById('editDescription').value;
   for (let index = 0; index < currentTasks.length; index++) {
